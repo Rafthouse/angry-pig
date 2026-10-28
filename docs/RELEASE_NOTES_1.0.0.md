@@ -19,7 +19,7 @@ Angry Pig is a free saturation and distortion plugin. Version 1.0.0 is the first
 
 ## Installation
 
-Follow [INSTALLATION.md](INSTALLATION.md). Close all hosts before installing or replacing the plugin. The Windows build needs the Microsoft Edge WebView2 Runtime.
+Follow [INSTALLATION.md](https://github.com/Rafthouse/angry-pig/blob/main/docs/INSTALLATION.md). Close all hosts before installing or replacing the plugin. The Windows build needs the Microsoft Edge WebView2 Runtime.
 
 ## Known limitations
 
@@ -38,7 +38,7 @@ Follow [INSTALLATION.md](INSTALLATION.md). Close all hosts before installing or 
 | `AngryPig-Setup-1.0.0-UNSIGNED.exe` | `9432A1896FBBD988E82AB0B39B52A29D4C25C3A5FC7DE406AA5D6E69998E5507` |
 | `AngryPig-Windows-VST3-1.0.0.zip` | `37BFF970CB31F0A3362269BBC30E8F527F2DEF3C774BF6A58481AF3EE0406054` |
 
-The same values are in [SHA256SUMS.txt](SHA256SUMS.txt).
+The same values are in [SHA256SUMS.txt](https://github.com/Rafthouse/angry-pig/blob/main/docs/SHA256SUMS.txt).
 
 To check a file on Windows, run `Get-FileHash <file> -Algorithm SHA256` in PowerShell.
 
@@ -48,4 +48,4 @@ Angry Pig 1.0.0 is free of charge. The plugin binaries may be downloaded and use
 
 ## Credits
 
-Created by Mykyta Shchur. © 2026 Mykyta Shchur. Third-party components and their licenses are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+Created by Mykyta Shchur. © 2026 Mykyta Shchur. Third-party components and their licenses are listed in [THIRD_PARTY_NOTICES.md](https://github.com/Rafthouse/angry-pig/blob/main/docs/THIRD_PARTY_NOTICES.md).
