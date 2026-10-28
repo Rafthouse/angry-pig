@@ -65,7 +65,7 @@ Not verified on macOS:
 - **macOS is not notarized.** The macOS packages are ad-hoc signed or unsigned, and Gatekeeper rejects them. Check the checksum before you open them.
 - **VST3 only.** There is no Audio Unit in 1.0.0 on either platform.
 - **Unsigned Windows installer.** SmartScreen may show a warning. Check the checksum before you run the installer.
-- **macOS packages do not include `THIRD_PARTY_NOTICES.txt`.** The Windows bundle includes it. The full notices are in [docs/THIRD_PARTY_NOTICES.txt](https://github.com/Rafthouse/angry-pig/blob/main/docs/THIRD_PARTY_NOTICES.txt).
+- **macOS 1.0.0 packages do not include `THIRD_PARTY_NOTICES.txt`.** The Windows bundle includes it. The file is attached to this release as a separate asset, and it is in the repository as [docs/THIRD_PARTY_NOTICES.txt](https://github.com/Rafthouse/angry-pig/blob/main/docs/THIRD_PARTY_NOTICES.txt).
 - **Test script in the bundles.** Both bundles contain `Contents/Resources/web/spike-test.js`. It does nothing unless a test host calls it.
 - **Stereo only.** Mono input is not supported.
 - **Saturation headroom.** The saturation stage approaches an output ceiling of about -0.1 dBFS. At high ANGER settings, GAIN has less audible effect.
@@ -83,7 +83,7 @@ Not verified on macOS:
 | `AngryPig-1.0.0-macOS.pkg` | `4793A2432D8FBCB5FC025CEDD09F22588056AC869F17B66481F37F660B94D32F` |
 | `AngryPig-1.0.0-macOS.dmg` | `7D4B3BA21E4A0A1CC17B94DF141127059325790062611B78214BA5EF2FE1565B` |
 
-The same values are in [SHA256SUMS.txt](https://github.com/Rafthouse/angry-pig/blob/main/docs/SHA256SUMS.txt). The macOS checksum file `SHA256SUMS-macOS.txt` is attached to this release.
+The release asset `SHA256SUMS.txt` lists the four binary files above. The same values are in [docs/SHA256SUMS.txt](https://github.com/Rafthouse/angry-pig/blob/main/docs/SHA256SUMS.txt). The macOS checksum file `SHA256SUMS-macOS.txt` and the notices file `THIRD_PARTY_NOTICES.txt` are also attached to this release.
 
 To check a file on Windows, run `Get-FileHash <file> -Algorithm SHA256` in PowerShell. On macOS, run `shasum -a 256 <file>` in Terminal.
 

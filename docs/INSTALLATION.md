@@ -101,4 +101,4 @@ Quit all DAWs and plugin hosts. Then delete `/Library/Audio/Plug-Ins/VST3/AngryP
 ### Known macOS notes
 
 - The bundle includes a test script, `Contents/Resources/web/spike-test.js`. It does nothing unless a test host calls it. The Windows bundle includes it as well.
-- The third-party notices file is **not** yet included in the macOS packages. The full notices are in the repository as [`docs/THIRD_PARTY_NOTICES.txt`](THIRD_PARTY_NOTICES.txt).
+- The third-party notices file is **not** included in the macOS 1.0.0 packages. The full notices are attached to the release as `THIRD_PARTY_NOTICES.txt` and are in the repository as [`docs/THIRD_PARTY_NOTICES.txt`](THIRD_PARTY_NOTICES.txt).

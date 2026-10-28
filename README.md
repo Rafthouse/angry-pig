@@ -153,7 +153,7 @@ Angry Pig is free to use. If it is useful to you, optional donations help fund f
 
 Created by **Mykyta Shchur**. © 2026 Mykyta Shchur. The interface, visual design and artwork are original works of the author.
 
-Angry Pig uses third-party components, including the iPlug 2 framework and the VST 3 SDK. They are listed with their licenses in [docs/THIRD_PARTY_NOTICES.md](docs/THIRD_PARTY_NOTICES.md) and included in each distribution.
+Angry Pig uses third-party components, including the iPlug 2 framework and the VST 3 SDK. They are listed with their licenses in [docs/THIRD_PARTY_NOTICES.md](docs/THIRD_PARTY_NOTICES.md). The full license texts are in the Windows bundle and in the `THIRD_PARTY_NOTICES.txt` file attached to the release. The macOS 1.0.0 packages do not contain them.
 
 **Source code is not published in this repository and is not licensed for reuse.** The author retains all rights to the source code and artwork. The compiled plugin is free to download and use. Redistribution terms beyond free binary distribution have not been published.
 

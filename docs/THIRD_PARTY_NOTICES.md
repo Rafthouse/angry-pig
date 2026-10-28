@@ -1,6 +1,6 @@
 # Third-party notices
 
-Angry Pig uses the components below. Each component keeps its own license. The full license texts are included in the VST3 bundle as `THIRD_PARTY_NOTICES.txt`, and in this repository as [THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt).
+Angry Pig uses the components below. Each component keeps its own license. The full license texts are included in the Windows VST3 bundle as `THIRD_PARTY_NOTICES.txt`. The same file is attached to the v1.0.0 release, and it is in this repository as [THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt). The macOS 1.0.0 packages do not contain this file.
 
 | Component | Use in Angry Pig | License |
 | --- | --- | --- |
