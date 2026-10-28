@@ -1,6 +1,6 @@
-﻿# Installing Angry Pig 1.0.0 (Windows)
+# Installing Angry Pig 1.0.0
 
-Angry Pig 1.0.0 is a VST3 plugin for 64-bit Windows 10 and 11. The release has two ways to install it.
+Angry Pig 1.0.0 is a VST3 plugin for 64-bit Windows 10 and 11, and for macOS 11.0 or later. This page covers Windows first, then macOS. The release has no Audio Unit for either platform.
 
 | Option | File | Use it when |
 | --- | --- | --- |
@@ -51,18 +51,54 @@ The bundle includes `THIRD_PARTY_NOTICES.txt` with the license texts of the comp
 
 Close all hosts, then delete the `AngryPigSpike.vst3` folder from `C:\Program Files\Common Files\VST3\`.
 
-## macOS 1.0.0 (VST3, universal)
+## macOS
 
-The macOS build is a universal VST3 (arm64 for Apple Silicon, x86_64 for Intel), validated on a
-GitHub macOS runner with `auval` (when the AU target is enabled) and `pluginval --strictness-level 8`.
+**Supported:** macOS 11.0 or later, on Apple Silicon (arm64) or Intel (x86_64). The VST3 bundle is universal. Audio Unit is **not** included in 1.0.0.
+
+**Status:** the package is **not signed with a Developer ID and not notarized**. Gatekeeper rejects it. See [Gatekeeper](#gatekeeper) before you install.
 
 | Option | File | Use it when |
 | --- | --- | --- |
-| Installer (recommended) | `AngryPig-1.0.0-macOS.pkg` | You want the plug-in copied to `/Library/Audio/Plug-Ins/VST3`. |
-| Disk image | `AngryPig-1.0.0-macOS.dmg` | You want to drag the bundle into place yourself. |
+| Installer | `AngryPig-1.0.0-macOS.pkg` | You want the bundle installed to `/Library/Audio/Plug-Ins/VST3/`. |
+| Disk image | `AngryPig-1.0.0-macOS.dmg` | You want to copy the bundle yourself. |
 
-The macOS builds are ad-hoc signed, not notarized. On first launch macOS may require
-System Settings -> Privacy & Security -> "Open Anyway".
+### Verify the download
 
-Checksums: `installer/macos/SHA256SUMS-macOS.txt`.
+```bash
+shasum -a 256 AngryPig-1.0.0-macOS.pkg AngryPig-1.0.0-macOS.dmg
+```
 
+Compare the output with the values in [`installer/macos/SHA256SUMS-macOS.txt`](../installer/macos/SHA256SUMS-macOS.txt) and in the release notes.
+
+### Install the package
+
+1. Close all DAWs and plugin hosts.
+2. Double-click `AngryPig-1.0.0-macOS.pkg` and follow the installer. It asks for an administrator password.
+3. The bundle is installed to `/Library/Audio/Plug-Ins/VST3/AngryPigSpike.vst3`.
+4. Rescan plugins in your host. Angry Pig appears as **Angry Pig 1.0**.
+
+### Install from the disk image
+
+1. Open `AngryPig-1.0.0-macOS.dmg`.
+2. Copy `AngryPigSpike.vst3` to `/Library/Audio/Plug-Ins/VST3/` (for the current user only: `~/Library/Audio/Plug-Ins/VST3/`).
+3. Do not drag it into Applications. The Applications shortcut in the disk image is not the plugin folder.
+4. Rescan plugins in your host.
+
+### Gatekeeper
+
+The package and the bundle are ad-hoc signed or unsigned, and they are not notarized. macOS shows a warning and may block the first launch. Before you open the file:
+
+- Check the SHA-256 checksum.
+- Only continue if you trust this download.
+- If macOS blocks it, open *System Settings → Privacy & Security* and choose *Open Anyway* for this file, if the option is offered.
+
+Do not disable Gatekeeper or System Integrity Protection to install Angry Pig.
+
+### Uninstall on macOS
+
+Quit all DAWs and plugin hosts. Then delete `/Library/Audio/Plug-Ins/VST3/AngryPigSpike.vst3` with administrator rights.
+
+### Known macOS notes
+
+- The bundle includes a test script, `Contents/Resources/web/spike-test.js`. It does nothing unless a test host calls it. The Windows bundle includes it as well.
+- The third-party notices file is **not** yet included in the macOS packages. The full notices are in the repository as [`docs/THIRD_PARTY_NOTICES.txt`](THIRD_PARTY_NOTICES.txt).

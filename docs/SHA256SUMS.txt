@@ -1,4 +1,4 @@
-﻿# SHA-256 checksums for Angry Pig 1.0.0 (Windows release assets)
+﻿# SHA-256 checksums for Angry Pig 1.0.0 (Windows and macOS release assets)
 # Verify with: Get-FileHash <file> -Algorithm SHA256
 
 9432A1896FBBD988E82AB0B39B52A29D4C25C3A5FC7DE406AA5D6E69998E5507  AngryPig-Setup-1.0.0-UNSIGNED.exe

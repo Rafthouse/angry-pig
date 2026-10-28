@@ -6,7 +6,7 @@
 
 Free saturation and distortion plugin
 
-![Platform: Windows x64 VST3](https://img.shields.io/badge/platform-Windows%20x64%20VST3-B3261E) ![macOS: planned](https://img.shields.io/badge/macOS-planned-6E6E6E) ![Version 1.0.0](https://img.shields.io/badge/version-1.0.0-D4A93C)
+![Platform: Windows x64 VST3](https://img.shields.io/badge/platform-Windows%20x64%20VST3-B3261E) ![macOS: VST3 available](https://img.shields.io/badge/macOS-VST3%20available-6E6E6E) ![Version 1.0.0](https://img.shields.io/badge/version-1.0.0-D4A93C)
 
 [**Download Angry Pig 1.0.0 for Windows**](https://github.com/Rafthouse/angry-pig/releases/tag/v1.0.0)
 
@@ -70,18 +70,18 @@ Plugin Doctor graphs, captured from the same build:
 | Harmonic analysis (THD -10.8 dB at -12 dBFS, ANGER 100 %) | Transfer curve (ANGER 100 %) |
 | --- | --- |
 | ![Plugin Doctor harmonic analysis](docs/images/plugindoctor/plugindoctor-harmonic-anger100-color0-gain0.png) | ![Plugin Doctor transfer curve at ANGER 100](docs/images/plugindoctor/plugindoctor-transfer-anger100.png) |
-| Transfer curve (ANGER 0 %) | Linear view (ANGER 0 %, broadband excitation) |
+| Transfer curve (ANGER 0 %) | Linear view (ANGER 0 %, Plugin Doctor default excitation) |
 | ![Plugin Doctor transfer curve at ANGER 0](docs/images/plugindoctor/plugindoctor-transfer-anger0.png) | ![Plugin Doctor linear view](docs/images/plugindoctor/plugindoctor-linear-anger0-color0.png) |
 
-The Plugin Doctor linear view uses broadband excitation and does not match the sine-based frequency response below about 100 Hz. The [measurement notes](docs/measurements/README.md#plugin-doctor-graphs) explain the difference.
+The Plugin Doctor linear view differs from the harness frequency response below about 100 Hz. This discrepancy is **unresolved**: it has not been shown to be a defect of either tool. The [measurement notes](docs/measurements/README.md#linear-response-discrepancy-investigation-unresolved) give the investigation.
 
 ## Downloads
 
 | Platform | Format | Status |
 | --- | --- | --- |
-| Windows 10 and 11, 64-bit | VST3 (installer and bundle) | **1.0.0 available** from the [Releases](https://github.com/Rafthouse/angry-pig/releases/tag/v1.0.0) page |
-| macOS, Apple Silicon | VST3 | Planned, not yet released |
-| macOS, Apple Silicon | Audio Unit (AUv2) | Planned, not yet released |
+| Windows 10 and 11, 64-bit | VST3 (installer and bundle) | **Released** in [1.0.0](https://github.com/Rafthouse/angry-pig/releases/tag/v1.0.0) |
+| macOS, Apple Silicon and Intel | VST3 (universal PKG and DMG) | **Available, validation pending.** Installation and pluginval passed on Apple Silicon and Intel runners. DAW and GUI smoke tests not yet run. Not notarized. |
+| macOS | Audio Unit (AUv2) | **Not included in 1.0.0** |
 
 Each release lists the SHA-256 checksum of every file. Check the checksum before you run an installer.
 
@@ -95,6 +95,16 @@ Windows 10 or 11 (64-bit) with a host that supports VST3, and the Microsoft Edge
 
 The installer is not code-signed yet. Windows SmartScreen may warn you. Verify the checksum first. Full instructions, including the bundle-only option and troubleshooting, are in [docs/INSTALLATION.md](docs/INSTALLATION.md).
 
+### macOS
+
+Apple Silicon or Intel. The package is a universal VST3 (arm64 and x86_64). The binary declares a minimum of macOS 11.0. Tested on macOS 14.8 (Apple Silicon) and macOS 15.7 (Intel).
+
+1. Verify the checksum: `shasum -a 256 AngryPig-1.0.0-macOS.pkg`.
+2. Run `AngryPig-1.0.0-macOS.pkg`. It installs `AngryPigSpike.vst3` to `/Library/Audio/Plug-Ins/VST3/` and asks for an administrator password.
+3. Rescan plugins in your host. Angry Pig appears as **Angry Pig 1.0**.
+
+The package is **not signed with a Developer ID and not notarized**. Gatekeeper rejects it. Install it only after you have verified the checksum and trust this download. If macOS blocks it, use *System Settings → Privacy & Security* and choose *Open Anyway* for this file. Do not disable Gatekeeper or System Integrity Protection. The disk image (`AngryPig-1.0.0-macOS.dmg`) contains the same bundle. Copy it to `/Library/Audio/Plug-Ins/VST3/`, not to Applications. The macOS guide is in [docs/INSTALLATION.md](docs/INSTALLATION.md#macos).
+
 ## Documentation
 
 - [User guide](docs/USER_GUIDE.md): what each control does, levels, examples, troubleshooting
@@ -107,21 +117,33 @@ The installer is not code-signed yet. Windows SmartScreen may warn you. Verify t
 
 | Item | Angry Pig 1.0.0 |
 | --- | --- |
-| Operating system | Windows 10 and 11, 64-bit |
-| Format | VST3 |
+| Operating system | Windows 10 and 11, 64-bit; macOS (universal arm64 and x86_64; the binary declares a minimum of macOS 11.0, tested on macOS 14.8 and 15.7) |
+| Format | VST3 on Windows and macOS. No Audio Unit in 1.0.0. |
 | Channels | Stereo only. Mono is not supported. |
 | Sample rates | Accepted by the plugin from 8 kHz to 384 kHz. Measurements were made at 44.1 kHz. |
 | Latency | Reported as 0 samples |
 | Oversampling | None. Heavy drive can alias high frequencies. |
-| Host testing | Ableton Live 12 Suite was used to check loading, the interface and the controls. Testing in other hosts has not been completed. |
+| Host testing | Ableton Live 12 Suite was used to check loading, the interface and the controls on Windows. No macOS host or DAW smoke test has been recorded. Testing in other hosts has not been completed. |
 
 ## Validation
+
+**Windows 1.0.0**
 
 - VST3 Validator: 47 of 47 tests passed on the Windows 1.0.0 bundle.
 - The four parameter identifiers, default values and ranges were checked on the built plugin.
 - Measurements summarised above and in [docs/measurements](docs/measurements/README.md).
 
-Not yet verified: macOS builds, automation and project recall across DAWs, and a clean installation on a fresh Windows virtual machine.
+**macOS 1.0.0** (published PKG and DMG; checked on isolated GitHub-hosted runners by the [macOS verification workflow](https://github.com/Rafthouse/angry-pig/actions/workflows/macos-release-verify.yml), run [40629905813](https://github.com/Rafthouse/angry-pig/actions/runs/40629905813))
+
+- Checksums: the downloaded files match the published SHA-256 values.
+- Architectures: the VST3 binary is universal, `x86_64 arm64`.
+- Installation with `installer` (PKG): passed on Apple Silicon (macOS 14.8) and Intel (macOS 15.7).
+- pluginval, strictness level 8, on the installed VST3: passed on both.
+- auval: not run. The package contains no Audio Unit.
+- Code signing: ad-hoc only. Notarization: not done. Gatekeeper (`spctl`): rejected.
+- DAW or GUI smoke test on macOS: not yet run.
+
+Not yet verified: automation and project recall across DAWs, macOS in a DAW, and a clean installation on a fresh Windows virtual machine.
 
 ## Support development
 

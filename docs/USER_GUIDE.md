@@ -2,7 +2,7 @@
 
 Angry Pig is a saturation and distortion plugin. You put it on a track, drive the sound into a saturation stage, and shape the result with four controls. This guide explains what each control does, how to set levels, and how to get subtle or strong results.
 
-Version: 1.0.0 (Windows, VST3).
+Version: 1.0.0 (Windows and macOS, VST3; no Audio Unit).
 
 ---
 
@@ -135,7 +135,7 @@ These are starting points, not presets. Adjust them to your material.
 
 ## 11. Known limitations
 
-- Windows only. macOS builds are planned.
+- Windows and macOS (11.0 or later) VST3 only. There is no Audio Unit in 1.0.0. The macOS packages are not notarized; see [INSTALLATION.md](INSTALLATION.md#macos).
 - Stereo only. Mono input is not supported.
 - Saturation runs at the session sample rate without oversampling. At high drive, high-frequency harmonics can fold back (alias).
 - The installer and the plugin are not code-signed yet. Windows may show a warning.

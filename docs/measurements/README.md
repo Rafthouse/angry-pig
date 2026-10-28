@@ -142,7 +142,7 @@ COLOR can raise the level of the band it boosts. If that band enters the saturat
 - At ANGER 0 %, the output equals the input plus GAIN plus 1.0 dB, within 0.01 dB across -24 to +18 dB.
 - When saturation engages, the output peak stays at -0.10 dBFS. The fundamental in the Fourier analysis can exceed 0 dBFS, because the waveform is squared off.
 - The gain reduction stage and the attack and release times are not separately measured here. Their values are described from the implementation in `docs/technical/`.
-- Plugin Doctor graphs are shown in the next section. They were captured with a different test signal, so their values are compared with the harness results there.
+- Plugin Doctor graphs are shown in the next section. Plugin Doctor uses its own test signals, so the two sets of values are compared with each other there. One difference, in the Linear view, is not resolved; see the investigation below.
 
 ## Plugin Doctor graphs
 
@@ -162,4 +162,20 @@ Captured in Plugin Doctor 2.7.3 (DDMF) with the Angry Pig 1.0 plug-in loaded in 
 
 ![Linear view, Plugin Doctor](../images/plugindoctor/plugindoctor-linear-anger0-color0.png)
 
-**Linear view, ANGER 0 %, COLOR 0 %.** Plugin Doctor's default excitation is broadband. This view does not match the sine-based harness frequency response below about 100 Hz. Plugin Doctor shows a rise of about +4.6 dB near 35 Hz and about -3 dB at the bottom of its range. The harness gives -10.5 dB at 20 Hz, -3.7 dB at 30 Hz, and about 0 dB from 50 Hz upward, with no 35 Hz rise. A likely cause is that broadband signals trigger the gain-reduction stage, which changes the low-frequency balance. This has not been verified. For small-signal frequency response, use the harness table above.
+**Linear view, ANGER 0 %, COLOR 0 %.** Plugin Doctor's Linear view shows a low-frequency rise of about +4.6 dB near 35 Hz, relative to its own 1 kHz reading. The harness, using sine tones, shows no such rise. This is an unresolved measurement discrepancy. It has not been shown to be a defect of either tool, and no DSP change was made for it. The investigation is below.
+
+### Linear-response discrepancy: investigation (unresolved)
+
+| Factor | Plugin Doctor (2.7.3) | Harness (sine tones) | Finding |
+| --- | --- | --- | --- |
+| Test signal | Default Linear excitation; PD does not document it. The "Random" option switches the view to a noise spectrum, which is not a transfer function. | One sine per frequency, 1 Hz bins, 1 s analysis window. | The default Linear mode is the only one comparable to the harness. The "Random" view was checked and is not comparable. |
+| Level | A level value of 3.58 dB is shown in the Linear view; its meaning is not documented. | Sine peaks from -40 to 0 dBFS. | At 35 Hz the harness gain stays at -2.18 dB from -40 to -3 dBFS. Only 0 dBFS changes the 1 kHz reference, through the gain-reduction stage. Level does not produce the rise. |
+| Plugin settings | ANGER 0 %, COLOR 0 %, GAIN 0 dB | ANGER 0 %, COLOR 0 %, GAIN 0 dB | Identical. |
+| Sample rate | Not shown in the Plugin Doctor interface or its log. | 44.1, 48 and 96 kHz | 35 Hz gain: -2.18, -2.03 and -2.08 dB. 20 Hz gain: -10.49, -10.65 and -10.68 dB. No rise at any rate. |
+| Measurement method | Averaged spectral analysis; method not documented. | Coherent single-tone DFT. | Results are not directly comparable. |
+| Absolute offset | Empty chain: flat line at +3.58 dB. Plugin chain: 0 dB at high frequencies. | +1.0 dB at 1 kHz for the plugin. | Plugin Doctor's absolute scale does not match the harness. Only the shape can be compared, and the shape still differs. |
+| Control | Plugin removed (empty chain): no feature near 35 Hz. | Not applicable. | The rise is produced when the plugin is in Plugin Doctor's chain. Plugin Doctor's own signal path adds no rise. |
+
+Relative to 1 kHz, the 35 Hz point is about +4.6 dB in Plugin Doctor and -3.2 dB in the harness, a difference of about 7.8 dB.
+
+**Status.** Unresolved. Not established: whether the cause lies in Plugin Doctor's excitation or analysis, or in the plugin's response to broadband signals. Not done: a broadband (noise or multi-tone) test with the harness, and reading Plugin Doctor's test level and sample rate, which the interface does not show. For small-signal frequency response, use the harness table above.
