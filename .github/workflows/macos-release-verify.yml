@@ -34,21 +34,23 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       TAG: ${{ inputs.tag }}
-      LOG_DIR: ${{ runner.temp }}/logs
-      REL_DIR: ${{ runner.temp }}/release
       PKG: AngryPig-1.0.0-macOS.pkg
       DMG: AngryPig-1.0.0-macOS.dmg
       VST3_INSTALLED: /Library/Audio/Plug-Ins/VST3/AngryPigSpike.vst3
     steps:
       - name: Prepare folders
-        run: mkdir -p "$LOG_DIR" "$REL_DIR"
+        run: |
+          LOG_DIR="$RUNNER_TEMP/logs"; REL_DIR="$RUNNER_TEMP/release"
+          mkdir -p "$LOG_DIR" "$REL_DIR"
 
       - name: System and toolchain
         run: |
+          LOG_DIR="$RUNNER_TEMP/logs"; REL_DIR="$RUNNER_TEMP/release"
           { uname -m; sw_vers; sysctl -n machdep.cpu.brand_string 2>/dev/null || true; } | tee "$LOG_DIR/system.txt"
 
       - name: Download the published macOS assets
         run: |
+          LOG_DIR="$RUNNER_TEMP/logs"; REL_DIR="$RUNNER_TEMP/release"
           set -o pipefail
           cd "$REL_DIR"
           gh release download "$TAG" --repo "$GITHUB_REPOSITORY" \
@@ -57,6 +59,7 @@ jobs:
 
       - name: SHA-256 of the downloaded files against the published checksum file
         run: |
+          LOG_DIR="$RUNNER_TEMP/logs"; REL_DIR="$RUNNER_TEMP/release"
           set -o pipefail
           cd "$REL_DIR"
           shasum -a 256 -c SHA256SUMS-macOS.txt 2>&1 | tee "$LOG_DIR/sha256-check.txt"
@@ -65,6 +68,7 @@ jobs:
 
       - name: Package contents and signature
         run: |
+          LOG_DIR="$RUNNER_TEMP/logs"; REL_DIR="$RUNNER_TEMP/release"
           cd "$REL_DIR"
           {
             echo "== pkgutil --check-signature"; pkgutil --check-signature "$PKG" || true
@@ -74,6 +78,7 @@ jobs:
 
       - name: Disk image contents, architectures and signature
         run: |
+          LOG_DIR="$RUNNER_TEMP/logs"; REL_DIR="$RUNNER_TEMP/release"
           set -o pipefail
           cd "$REL_DIR"
           {
@@ -94,6 +99,7 @@ jobs:
 
       - name: Install the PKG on the runner (installation test)
         run: |
+          LOG_DIR="$RUNNER_TEMP/logs"; REL_DIR="$RUNNER_TEMP/release"
           set -o pipefail
           cd "$REL_DIR"
           sudo installer -pkg "$PKG" -target / 2>&1 | tee "$LOG_DIR/install.txt"
@@ -103,6 +109,7 @@ jobs:
 
       - name: Installed VST3: architectures, signature and Gatekeeper
         run: |
+          LOG_DIR="$RUNNER_TEMP/logs"; REL_DIR="$RUNNER_TEMP/release"
           {
             echo "== lipo -archs"; lipo -archs "$VST3_INSTALLED/Contents/MacOS/AngryPigSpike"
             echo "== codesign -dv"; codesign -dv --verbose=4 "$VST3_INSTALLED" 2>&1 || true
@@ -117,6 +124,7 @@ jobs:
 
       - name: pluginval (installed VST3, strictness level 8)
         run: |
+          LOG_DIR="$RUNNER_TEMP/logs"; REL_DIR="$RUNNER_TEMP/release"
           set -o pipefail
           gh release download --repo Tracktion/pluginval --pattern 'pluginval_macOS.zip' --dir "$RUNNER_TEMP/pv" 2>&1 | tee "$LOG_DIR/pluginval-download.txt"
           unzip -q "$RUNNER_TEMP/pv/pluginval_macOS.zip" -d "$RUNNER_TEMP/pv/bin"
@@ -127,6 +135,7 @@ jobs:
 
       - name: auval (Audio Unit, only if the package contains one)
         run: |
+          LOG_DIR="$RUNNER_TEMP/logs"; REL_DIR="$RUNNER_TEMP/release"
           if ls /Library/Audio/Plug-Ins/Components/*.component >/dev/null 2>&1; then
             for c in /Library/Audio/Plug-Ins/Components/*.component; do
               echo "== $c"
