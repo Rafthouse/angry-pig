@@ -65,6 +65,16 @@ These plots come from measurements of the Windows 1.0.0 plugin. The full tables 
 | Frequency response | GAIN law |
 | ![Frequency response](docs/images/measurements/frequency-response.png) | ![GAIN law](docs/images/measurements/gain-law.png) |
 
+Plugin Doctor graphs, captured from the same build:
+
+| Harmonic analysis (THD -10.8 dB at -12 dBFS, ANGER 100 %) | Transfer curve (ANGER 100 %) |
+| --- | --- |
+| ![Plugin Doctor harmonic analysis](docs/images/plugindoctor/plugindoctor-harmonic-anger100-color0-gain0.png) | ![Plugin Doctor transfer curve at ANGER 100](docs/images/plugindoctor/plugindoctor-transfer-anger100.png) |
+| Transfer curve (ANGER 0 %) | Linear view (ANGER 0 %, broadband excitation) |
+| ![Plugin Doctor transfer curve at ANGER 0](docs/images/plugindoctor/plugindoctor-transfer-anger0.png) | ![Plugin Doctor linear view](docs/images/plugindoctor/plugindoctor-linear-anger0-color0.png) |
+
+The Plugin Doctor linear view uses broadband excitation and does not match the sine-based frequency response below about 100 Hz. The [measurement notes](docs/measurements/README.md#plugin-doctor-graphs) explain the difference.
+
 ## Downloads
 
 | Platform | Format | Status |

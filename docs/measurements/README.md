@@ -142,4 +142,24 @@ COLOR can raise the level of the band it boosts. If that band enters the saturat
 - At ANGER 0 %, the output equals the input plus GAIN plus 1.0 dB, within 0.01 dB across -24 to +18 dB.
 - When saturation engages, the output peak stays at -0.10 dBFS. The fundamental in the Fourier analysis can exceed 0 dBFS, because the waveform is squared off.
 - The gain reduction stage and the attack and release times are not separately measured here. Their values are described from the implementation in `docs/technical/`.
-- PluginDoctor graphs for this release are not included. A separate Plugin Doctor run is needed for those.
+- Plugin Doctor graphs are shown in the next section. They were captured with a different test signal, so their values are compared with the harness results there.
+
+## Plugin Doctor graphs
+
+Captured in Plugin Doctor 2.7.3 (DDMF) with the Angry Pig 1.0 plug-in loaded in Chain #1. Plugin Doctor generated the test signal. The plug-in is the same installed 1.0.0 build as above.
+
+![Harmonic analysis, Plugin Doctor](../images/plugindoctor/plugindoctor-harmonic-anger100-color0-gain0.png)
+
+**Harmonic analysis.** Sine at 998.6 Hz (Plugin Doctor's generator), level -12 dBFS, ANGER 100 %, COLOR 0 %, GAIN 0 dB. Plugin Doctor reads THD -10.8 dB. The harness gives -10.82 dB (H2 to H10) at 999 Hz under the same settings, so the two agree.
+
+![Transfer curve at ANGER 100, Plugin Doctor](../images/plugindoctor/plugindoctor-transfer-anger100.png)
+
+**Transfer curve, ANGER 100 %.** Static level sweep from -20 to 0 dB, COLOR 0 %, GAIN 0 dB. The output flattens near 0 dB, which is the saturation ceiling.
+
+![Transfer curve at ANGER 0, Plugin Doctor](../images/plugindoctor/plugindoctor-transfer-anger0.png)
+
+**Transfer curve, ANGER 0 %.** The same sweep at ANGER 0 %. The output sits about 1 dB above the unity line, the base gain. It bends near -2 dB input as the saturation stage starts.
+
+![Linear view, Plugin Doctor](../images/plugindoctor/plugindoctor-linear-anger0-color0.png)
+
+**Linear view, ANGER 0 %, COLOR 0 %.** Plugin Doctor's default excitation is broadband. This view does not match the sine-based harness frequency response below about 100 Hz. Plugin Doctor shows a rise of about +4.6 dB near 35 Hz and about -3 dB at the bottom of its range. The harness gives -10.5 dB at 20 Hz, -3.7 dB at 30 Hz, and about 0 dB from 50 Hz upward, with no 35 Hz rise. A likely cause is that broadband signals trigger the gain-reduction stage, which changes the low-frequency balance. This has not been verified. For small-signal frequency response, use the harness table above.
