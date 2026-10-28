@@ -1,4 +1,4 @@
-# Installing Angry Pig 1.0.0 (Windows)
+﻿# Installing Angry Pig 1.0.0 (Windows)
 
 Angry Pig 1.0.0 is a VST3 plugin for 64-bit Windows 10 and 11. The release has two ways to install it.
 
@@ -50,3 +50,19 @@ The bundle includes `THIRD_PARTY_NOTICES.txt` with the license texts of the comp
 ## Removing manually
 
 Close all hosts, then delete the `AngryPigSpike.vst3` folder from `C:\Program Files\Common Files\VST3\`.
+
+## macOS 1.0.0 (VST3, universal)
+
+The macOS build is a universal VST3 (arm64 for Apple Silicon, x86_64 for Intel), validated on a
+GitHub macOS runner with `auval` (when the AU target is enabled) and `pluginval --strictness-level 8`.
+
+| Option | File | Use it when |
+| --- | --- | --- |
+| Installer (recommended) | `AngryPig-1.0.0-macOS.pkg` | You want the plug-in copied to `/Library/Audio/Plug-Ins/VST3`. |
+| Disk image | `AngryPig-1.0.0-macOS.dmg` | You want to drag the bundle into place yourself. |
+
+The macOS builds are ad-hoc signed, not notarized. On first launch macOS may require
+System Settings -> Privacy & Security -> "Open Anyway".
+
+Checksums: `installer/macos/SHA256SUMS-macOS.txt`.
+
