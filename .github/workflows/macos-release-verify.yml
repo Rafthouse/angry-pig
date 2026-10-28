@@ -126,11 +126,17 @@ jobs:
         run: |
           LOG_DIR="$RUNNER_TEMP/logs"; REL_DIR="$RUNNER_TEMP/release"
           set -o pipefail
-          gh release download --repo Tracktion/pluginval --pattern 'pluginval_macOS.zip' --dir "$RUNNER_TEMP/pv" 2>&1 | tee "$LOG_DIR/pluginval-download.txt"
+          # Pinned: v1.0.4 is the release marked Latest in Tracktion/pluginval (2024-12-04).
+          # The archive must match the SHA-256 below, or the run stops.
+          PV_VERSION=v1.0.4
+          PV_SHA256=3c4c533bda0c5059eea3ddaea752d757ee2025041f0f47e6bcb0e87f6082b29f
+          mkdir -p "$RUNNER_TEMP/pv"
+          curl -fL -o "$RUNNER_TEMP/pv/pluginval_macOS.zip" "https://github.com/Tracktion/pluginval/releases/download/$PV_VERSION/pluginval_macOS.zip" 2>&1 | tee "$LOG_DIR/pluginval-download.txt"
+          echo "$PV_SHA256  $RUNNER_TEMP/pv/pluginval_macOS.zip" | shasum -a 256 -c - 2>&1 | tee -a "$LOG_DIR/pluginval-download.txt"
           unzip -q "$RUNNER_TEMP/pv/pluginval_macOS.zip" -d "$RUNNER_TEMP/pv/bin"
           BIN=$(find "$RUNNER_TEMP/pv/bin" -name pluginval -type f | head -n 1)
           chmod +x "$BIN"
-          echo "pluginval binary: $BIN" | tee -a "$LOG_DIR/pluginval-download.txt"
+          echo "pluginval $PV_VERSION binary: $BIN" | tee -a "$LOG_DIR/pluginval-download.txt"
           "$BIN" --strictness-level 8 --validate "$VST3_INSTALLED" 2>&1 | tee "$LOG_DIR/pluginval.txt"
 
       - name: "auval (Audio Unit, only if the package contains one)"
