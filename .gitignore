@@ -1,0 +1,41 @@
+# Build output
+build/
+build-*/
+out/
+*.pdb
+*.obj
+*.lib
+*.exp
+*.ilk
+*.idb
+*.iobj
+*.ipdb
+
+# Visual Studio and CMake
+.vs/
+CMakeCache.txt
+CMakeFiles/
+*.sln.cache
+*.vcxproj.user
+
+# Installer working folders
+installer/payload/
+installer/setup-stage*/
+installer/setup-out*/
+sandbox/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+*.swp
+
+# Dependencies and local tools
+node_modules/
+.env

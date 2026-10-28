@@ -1,0 +1,74 @@
+# Verification workflow for the Angry Pig public repository.
+#
+# This repository does not contain the plugin source code, so no job here builds the
+# plugin. The jobs below check the documentation, the installer script and the
+# published Windows release assets. macOS build jobs are not configured yet.
+name: verify
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  repository-checks:
+    name: Repository checks (links, images, leaked paths)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run checks
+        run: python3 .github/scripts/check_repo.py
+
+  installer-script:
+    name: Installer script parses (Windows PowerShell)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Parse AngryPig-Install.ps1
+        shell: pwsh
+        run: |
+          $errors = $null
+          $tokens = $null
+          [System.Management.Automation.Language.Parser]::ParseFile(
+            (Join-Path $env:GITHUB_WORKSPACE 'installer/AngryPig-Install.ps1'), [ref]$tokens, [ref]$errors) | Out-Null
+          if ($errors -and $errors.Count -gt 0) {
+            $errors | ForEach-Object { Write-Error $_.Message }
+            exit 1
+          }
+          Write-Output 'Installer script parses without errors.'
+
+  release-assets:
+    name: Published Windows assets match SHA256SUMS.txt
+    if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
+    runs-on: windows-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download release assets
+        shell: pwsh
+        run: |
+          $tag = if ($env:GITHUB_EVENT_NAME -eq 'release') { $env:GITHUB_REF_NAME } else { 'v1.0.0' }
+          gh release download $tag --repo "$env:GITHUB_REPOSITORY" --dir assets --pattern 'AngryPig-*'
+      - name: Compare checksums
+        shell: pwsh
+        run: |
+          $expected = @{}
+          Get-Content docs/SHA256SUMS.txt | Where-Object { $_ -match '^[0-9A-Fa-f]{64}\s' } | ForEach-Object {
+            $parts = $_ -split '\s+', 2
+            $expected[$parts[1].Trim()] = $parts[0].ToUpper()
+          }
+          $failed = $false
+          foreach ($name in $expected.Keys) {
+            $file = Join-Path 'assets' $name
+            if (-not (Test-Path $file)) { Write-Error "Missing asset: $name"; $failed = $true; continue }
+            $actual = (Get-FileHash -Algorithm SHA256 -LiteralPath $file).Hash
+            if ($actual -ne $expected[$name]) { Write-Error "Checksum mismatch: $name"; $failed = $true }
+            else { Write-Output "OK  $name" }
+          }
+          if ($failed) { exit 1 }
