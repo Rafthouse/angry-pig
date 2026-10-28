@@ -1,0 +1,145 @@
+# Verification of the published macOS 1.0.0 release assets on isolated GitHub-hosted runners.
+#
+# This workflow does not build anything. It downloads the public PKG and DMG from the
+# release tag, checks their SHA-256 values, inspects their contents and architectures,
+# installs the PKG on the runner, and runs pluginval and (when present) auval against the
+# installed copies. Each step writes a log, and the logs are uploaded as artifacts.
+#
+# Results are only what the logs show. A step that is skipped is reported as NOT RUN.
+name: macos-release-verify
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag whose macOS assets are verified
+        required: true
+        default: v1.0.0
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify published macOS assets (${{ matrix.label }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-14
+            label: arm64
+          - runner: macos-13
+            label: x86_64
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TAG: ${{ inputs.tag }}
+      LOG_DIR: ${{ runner.temp }}/logs
+      REL_DIR: ${{ runner.temp }}/release
+      PKG: AngryPig-1.0.0-macOS.pkg
+      DMG: AngryPig-1.0.0-macOS.dmg
+      VST3_INSTALLED: /Library/Audio/Plug-Ins/VST3/AngryPigSpike.vst3
+    steps:
+      - name: Prepare folders
+        run: mkdir -p "$LOG_DIR" "$REL_DIR"
+
+      - name: System and toolchain
+        run: |
+          { uname -m; sw_vers; sysctl -n machdep.cpu.brand_string 2>/dev/null || true; } | tee "$LOG_DIR/system.txt"
+
+      - name: Download the published macOS assets
+        run: |
+          set -o pipefail
+          cd "$REL_DIR"
+          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" \
+            --pattern "$PKG" --pattern "$DMG" --pattern 'SHA256SUMS-macOS.txt' 2>&1 | tee "$LOG_DIR/download.txt"
+          ls -la | tee -a "$LOG_DIR/download.txt"
+
+      - name: SHA-256 of the downloaded files against the published checksum file
+        run: |
+          set -o pipefail
+          cd "$REL_DIR"
+          shasum -a 256 -c SHA256SUMS-macOS.txt 2>&1 | tee "$LOG_DIR/sha256-check.txt"
+          echo "--- SHA-256 as computed on this runner"
+          shasum -a 256 "$PKG" "$DMG" | tee -a "$LOG_DIR/sha256-check.txt"
+
+      - name: Package contents and signature
+        run: |
+          cd "$REL_DIR"
+          {
+            echo "== pkgutil --check-signature"; pkgutil --check-signature "$PKG" || true
+            echo "== pkgutil --payload-files"; pkgutil --payload-files "$PKG"
+            echo "== spctl assessment of the package (install type)"; spctl -a -vvv -t install "$PKG" || true
+          } 2>&1 | tee "$LOG_DIR/pkg-inspect.txt"
+
+      - name: Disk image contents, architectures and signature
+        run: |
+          set -o pipefail
+          cd "$REL_DIR"
+          {
+            echo "== hdiutil verify"; hdiutil verify "$DMG" || true
+            MNT=$(mktemp -d)
+            hdiutil attach -readonly -nobrowse -mountpoint "$MNT" "$DMG"
+            echo "== contents"; ls -la "$MNT"
+            for b in "$MNT"/*.vst3 "$MNT"/*.component; do
+              [ -e "$b" ] || continue
+              echo "== bundle: $b"
+              find "$b" -maxdepth 3 -print
+              exe=$(find "$b/Contents/MacOS" -maxdepth 1 -type f | head -n 1)
+              echo "lipo -archs: $(lipo -archs "$exe")"
+              codesign --verify --deep --strict --verbose=2 "$b" 2>&1 || true
+            done
+            hdiutil detach "$MNT" || true
+          } 2>&1 | tee "$LOG_DIR/dmg-inspect.txt"
+
+      - name: Install the PKG on the runner (installation test)
+        run: |
+          set -o pipefail
+          cd "$REL_DIR"
+          sudo installer -pkg "$PKG" -target / 2>&1 | tee "$LOG_DIR/install.txt"
+          echo "== installed files" | tee -a "$LOG_DIR/install.txt"
+          ls -la /Library/Audio/Plug-Ins/VST3/ /Library/Audio/Plug-Ins/Components/ 2>&1 | tee -a "$LOG_DIR/install.txt" || true
+          test -d "$VST3_INSTALLED" && echo "VST3 installed: $VST3_INSTALLED" | tee -a "$LOG_DIR/install.txt"
+
+      - name: Installed VST3: architectures, signature and Gatekeeper
+        run: |
+          {
+            echo "== lipo -archs"; lipo -archs "$VST3_INSTALLED/Contents/MacOS/AngryPigSpike"
+            echo "== codesign -dv"; codesign -dv --verbose=4 "$VST3_INSTALLED" 2>&1 || true
+            echo "== codesign --verify"; codesign --verify --deep --strict --verbose=2 "$VST3_INSTALLED" 2>&1 || true
+            echo "== spctl (execute)"; spctl -a -vvv -t execute "$VST3_INSTALLED" 2>&1 || true
+            echo "== stapler (notarization ticket)"; xcrun stapler validate "$VST3_INSTALLED" 2>&1 || true
+            echo "== Info.plist (selected keys)"
+            /usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$VST3_INSTALLED/Contents/Info.plist" 2>&1 || true
+            /usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$VST3_INSTALLED/Contents/Info.plist" 2>&1 || true
+            /usr/libexec/PlistBuddy -c "Print :CFBundleExecutable" "$VST3_INSTALLED/Contents/Info.plist" 2>&1 || true
+          } 2>&1 | tee "$LOG_DIR/installed-vst3-inspect.txt"
+
+      - name: pluginval (installed VST3, strictness level 8)
+        run: |
+          set -o pipefail
+          gh release download --repo Tracktion/pluginval --pattern 'pluginval_macOS.zip' --dir "$RUNNER_TEMP/pv" 2>&1 | tee "$LOG_DIR/pluginval-download.txt"
+          unzip -q "$RUNNER_TEMP/pv/pluginval_macOS.zip" -d "$RUNNER_TEMP/pv/bin"
+          BIN=$(find "$RUNNER_TEMP/pv/bin" -name pluginval -type f | head -n 1)
+          chmod +x "$BIN"
+          echo "pluginval binary: $BIN" | tee -a "$LOG_DIR/pluginval-download.txt"
+          "$BIN" --strictness-level 8 --validate "$VST3_INSTALLED" 2>&1 | tee "$LOG_DIR/pluginval.txt"
+
+      - name: auval (Audio Unit, only if the package contains one)
+        run: |
+          if ls /Library/Audio/Plug-Ins/Components/*.component >/dev/null 2>&1; then
+            for c in /Library/Audio/Plug-Ins/Components/*.component; do
+              echo "== $c"
+              /usr/bin/auval -v -a 2>&1 | tee "$LOG_DIR/auval.txt" || true
+            done
+          else
+            echo "NOT RUN: the published PKG contains no Audio Unit (.component); auval has nothing to validate." | tee "$LOG_DIR/auval.txt"
+          fi
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-verify-${{ matrix.label }}
+          path: ${{ runner.temp }}/logs
+          if-no-files-found: warn
