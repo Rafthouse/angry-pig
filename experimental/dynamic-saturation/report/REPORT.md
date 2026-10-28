@@ -120,7 +120,7 @@ Why C is off: with C on the floor is 4-8 dB above REF, because B alone already r
 | Manageable CPU | PASS by estimate and by harness timing (upper bound about 0.1 % of one core) | |
 
 Known deviations, stated without compensation:
-- 8-22 kHz floor is 3.2 dB below REF (-152.5 versus -155.7 dBc). C supplies that floor but adds too much in the 20 Hz-8 kHz range. A variant with only C's high-frequency path was not tested; that would be a new change and needs an owner decision.
+- 8-22 kHz floor is 3.2 dB above REF (-152.5 versus -155.7 dBc). C supplies that floor but adds too much in the 20 Hz-8 kHz range. A variant with only C's high-frequency path was not tested; that would be a new change and needs an owner decision.
 - H8 is 2.6 dB shallower than REF.
 
 ## 6. Safe testing
@@ -148,7 +148,7 @@ Test build with a test-only switch AP_DYNAMIC_C_LOWPATH=0 (C without its 70 Hz l
 | ABC (C full) | -75.82 | -80.30 | -109.8 | -138.8 (+5.1) | -144.1 (+3.9) | -149.9 (+5.8) |
 | ABC, C high-frequency only | -75.82 | -83.38 | -118.1 | -139.5 (+4.4) | -144.1 (+3.9) | -150.0 (+5.7) |
 
-Result: rejected. The high-frequency-only C keeps the low-frequency level right, but its 2.5 kHz branch overshoots the 200 Hz-22 kHz floor by 4-6 dB. The shipped default stays AB (C off). The remaining deviation of AB is the 8-22 kHz floor at -3.1 dB. Closing it would need a new level setting for C's 2.5 kHz branch, which is a new coefficient and needs an owner decision.
+Result: rejected. The high-frequency-only C keeps the low-frequency level right, but its 2.5 kHz branch overshoots the 200 Hz-22 kHz floor by 4-6 dB. The shipped default stays AB (C off). The remaining deviation of AB is the 8-22 kHz floor at +3.1 dB above REF. Closing it would need a new level setting for C's 2.5 kHz branch, which is a new coefficient and needs an owner decision.
 
 ## 9. Host checks: Class ID, Plugin Doctor and REAPER (status)
 

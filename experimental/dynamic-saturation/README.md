@@ -37,7 +37,7 @@ Summary of `report/REPORT.md`; see the report for conditions and limits.
 - Halo H2..H14 (1-128 Hz): candidate -75.8 dBc, reference -76.0 dBc. Seed-to-seed spread about 0.5 dB (-75.8, -76.1, -76.3 dBc).
 - Halo shape: energy within 32 Hz and the density slope match the reference within 0.1 dB and 0.1 dB/oct.
 - Odd harmonics H3..H15 are identical to the RC1.1 path to 0.001 dB. THD is unchanged within 0.003 dB, which is why THD alone does not show the halo.
-- 8-22 kHz broadband floor is about 3 dB below the reference (the known remaining deviation).
+- 8-22 kHz broadband floor is about 3 dB above the reference (-152.5 versus -155.7 dBc; the known remaining deviation).
 - Silence gives exact zero output; block sizes 1, 64, 127 and 128 give bit-identical output; no onset after reset.
 
 Not done: music or programme-material listening tests, decay tests, and a completed Harmonic comparison in
