@@ -38,17 +38,17 @@ jobs:
       DMG: AngryPig-1.0.0-macOS.dmg
       VST3_INSTALLED: /Library/Audio/Plug-Ins/VST3/AngryPigSpike.vst3
     steps:
-      - name: Prepare folders
+      - name: "Prepare folders"
         run: |
           LOG_DIR="$RUNNER_TEMP/logs"; REL_DIR="$RUNNER_TEMP/release"
           mkdir -p "$LOG_DIR" "$REL_DIR"
 
-      - name: System and toolchain
+      - name: "System and toolchain"
         run: |
           LOG_DIR="$RUNNER_TEMP/logs"; REL_DIR="$RUNNER_TEMP/release"
           { uname -m; sw_vers; sysctl -n machdep.cpu.brand_string 2>/dev/null || true; } | tee "$LOG_DIR/system.txt"
 
-      - name: Download the published macOS assets
+      - name: "Download the published macOS assets"
         run: |
           LOG_DIR="$RUNNER_TEMP/logs"; REL_DIR="$RUNNER_TEMP/release"
           set -o pipefail
@@ -57,7 +57,7 @@ jobs:
             --pattern "$PKG" --pattern "$DMG" --pattern 'SHA256SUMS-macOS.txt' 2>&1 | tee "$LOG_DIR/download.txt"
           ls -la | tee -a "$LOG_DIR/download.txt"
 
-      - name: SHA-256 of the downloaded files against the published checksum file
+      - name: "SHA-256 of the downloaded files against the published checksum file"
         run: |
           LOG_DIR="$RUNNER_TEMP/logs"; REL_DIR="$RUNNER_TEMP/release"
           set -o pipefail
@@ -66,7 +66,7 @@ jobs:
           echo "--- SHA-256 as computed on this runner"
           shasum -a 256 "$PKG" "$DMG" | tee -a "$LOG_DIR/sha256-check.txt"
 
-      - name: Package contents and signature
+      - name: "Package contents and signature"
         run: |
           LOG_DIR="$RUNNER_TEMP/logs"; REL_DIR="$RUNNER_TEMP/release"
           cd "$REL_DIR"
@@ -76,7 +76,7 @@ jobs:
             echo "== spctl assessment of the package (install type)"; spctl -a -vvv -t install "$PKG" || true
           } 2>&1 | tee "$LOG_DIR/pkg-inspect.txt"
 
-      - name: Disk image contents, architectures and signature
+      - name: "Disk image contents, architectures and signature"
         run: |
           LOG_DIR="$RUNNER_TEMP/logs"; REL_DIR="$RUNNER_TEMP/release"
           set -o pipefail
@@ -97,7 +97,7 @@ jobs:
             hdiutil detach "$MNT" || true
           } 2>&1 | tee "$LOG_DIR/dmg-inspect.txt"
 
-      - name: Install the PKG on the runner (installation test)
+      - name: "Install the PKG on the runner (installation test)"
         run: |
           LOG_DIR="$RUNNER_TEMP/logs"; REL_DIR="$RUNNER_TEMP/release"
           set -o pipefail
@@ -107,7 +107,7 @@ jobs:
           ls -la /Library/Audio/Plug-Ins/VST3/ /Library/Audio/Plug-Ins/Components/ 2>&1 | tee -a "$LOG_DIR/install.txt" || true
           test -d "$VST3_INSTALLED" && echo "VST3 installed: $VST3_INSTALLED" | tee -a "$LOG_DIR/install.txt"
 
-      - name: Installed VST3: architectures, signature and Gatekeeper
+      - name: "Installed VST3 - architectures, signature and Gatekeeper"
         run: |
           LOG_DIR="$RUNNER_TEMP/logs"; REL_DIR="$RUNNER_TEMP/release"
           {
@@ -122,7 +122,7 @@ jobs:
             /usr/libexec/PlistBuddy -c "Print :CFBundleExecutable" "$VST3_INSTALLED/Contents/Info.plist" 2>&1 || true
           } 2>&1 | tee "$LOG_DIR/installed-vst3-inspect.txt"
 
-      - name: pluginval (installed VST3, strictness level 8)
+      - name: "pluginval (installed VST3, strictness level 8)"
         run: |
           LOG_DIR="$RUNNER_TEMP/logs"; REL_DIR="$RUNNER_TEMP/release"
           set -o pipefail
@@ -133,7 +133,7 @@ jobs:
           echo "pluginval binary: $BIN" | tee -a "$LOG_DIR/pluginval-download.txt"
           "$BIN" --strictness-level 8 --validate "$VST3_INSTALLED" 2>&1 | tee "$LOG_DIR/pluginval.txt"
 
-      - name: auval (Audio Unit, only if the package contains one)
+      - name: "auval (Audio Unit, only if the package contains one)"
         run: |
           LOG_DIR="$RUNNER_TEMP/logs"; REL_DIR="$RUNNER_TEMP/release"
           if ls /Library/Audio/Plug-Ins/Components/*.component >/dev/null 2>&1; then
@@ -145,7 +145,7 @@ jobs:
             echo "NOT RUN: the published PKG contains no Audio Unit (.component); auval has nothing to validate." | tee "$LOG_DIR/auval.txt"
           fi
 
-      - name: Upload logs
+      - name: "Upload logs"
         if: always()
         uses: actions/upload-artifact@v4
         with:
