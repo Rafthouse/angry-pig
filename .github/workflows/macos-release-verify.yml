@@ -29,7 +29,7 @@ jobs:
         include:
           - runner: macos-14
             label: arm64
-          - runner: macos-13
+          - runner: macos-15-intel
             label: x86_64
     env:
       GH_TOKEN: ${{ github.token }}
