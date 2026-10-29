@@ -238,7 +238,10 @@ jobs:
           pkgutil --payload-files "pkg/AngryPig-$VERSION-macOS.pkg" | tee out/pkg-payload.txt
           grep -qx "./Library/Audio/Plug-Ins/VST3/AngryPigSpike.vst3" out/pkg-payload.txt
           grep -qx "./Library/Audio/Plug-Ins/Components/AngryPigSpike.component" out/pkg-payload.txt
-          if grep -v "^\.$\|^\./Library$\|^\./Library/Audio\(/Plug-Ins\(/VST3\|/Components\)\{0,1\}\)\{0,1\}$\|/AngryPigSpike\.\(vst3\|component\)" out/pkg-payload.txt; then echo "unexpected file in the package"; exit 1; fi
+          if grep -v -x -F -e . -e ./Library -e ./Library/Audio -e ./Library/Audio/Plug-Ins -e ./Library/Audio/Plug-Ins/VST3 -e ./Library/Audio/Plug-Ins/Components out/pkg-payload.txt \
+            | grep -v -E '^\./Library/Audio/Plug-Ins/(VST3/AngryPigSpike\.vst3|Components/AngryPigSpike\.component)(/|$)'; then
+            echo "unexpected file in the package"; exit 1
+          fi
 
       - uses: actions/upload-artifact@v4
         with:
