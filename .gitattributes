@@ -1,0 +1,4 @@
+# Keep sources and the vendored archive byte-exact on every platform.
+src/** -text
+deps/** binary
+notices/** -text

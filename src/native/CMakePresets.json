@@ -1,0 +1,19 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "windows-build01",
+      "generator": "Visual Studio 17 2022",
+      "architecture": "x64",
+      "binaryDir": "${sourceDir}/../build-lean",
+      "cacheVariables": {
+        "IPLUG_DEPLOY_PLUGINS": "OFF",
+        "CMAKE_SYSTEM_VERSION": "10.0.28000.0",
+        "FETCHCONTENT_FULLY_DISCONNECTED": "ON",
+        "FETCHCONTENT_SOURCE_DIR_WIL": "${sourceDir}/../deps/wil",
+        "AP_DIAGNOSTICS": "OFF",
+        "AP_TIMING": "OFF"
+      }
+    }
+  ]
+}
