@@ -29,12 +29,12 @@ if(MSVC)
  target_compile_options(AngryPigSpike-vst3 PRIVATE /fp:strict)
 endif()
 # Objective-C class names are global in a host process. Angry Pig 1.0.0 uses the default
-# prefix vAngryPigSpike, so this plug-in needs its own to load next to it.
+# prefix vAngryPigSpike and the 1.1.1 beta vAngryPigDynSat, so each release gets its own.
 if(APPLE)
  foreach(t AngryPigSpike-vst3 AngryPigSpike-au)
   if(TARGET ${t})
    get_target_property(ap_defs ${t} COMPILE_DEFINITIONS)
-   list(TRANSFORM ap_defs REPLACE "^OBJC_PREFIX=.*$" "OBJC_PREFIX=vAngryPigDynSat")
+   list(TRANSFORM ap_defs REPLACE "^OBJC_PREFIX=.*$" "OBJC_PREFIX=vAngryPig111")
    set_property(TARGET ${t} PROPERTY COMPILE_DEFINITIONS ${ap_defs})
   endif()
  endforeach()

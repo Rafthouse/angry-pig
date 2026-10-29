@@ -1,8 +1,8 @@
-#define PLUG_NAME "Angry Pig Dynamic Saturation (candidate)"
+#define PLUG_NAME "Angry Pig"
 #define PLUG_MFR "Mykyta Shchur"
 #define PLUG_VERSION_HEX 0x00010101
-#define PLUG_VERSION_STR "1.1.1-beta1"
-#define PLUG_UNIQUE_ID 'APd2'
+#define PLUG_VERSION_STR "1.1.1"
+#define PLUG_UNIQUE_ID 'APm1'
 #define PLUG_MFR_ID 'APLb'
 #define PLUG_URL_STR "https://iplug2.github.io"
 #define PLUG_EMAIL_STR ""
@@ -10,7 +10,7 @@
 #define PLUG_CLASS_NAME AngryPigSpike
 
 // Must match CFBundleIdentifier in the Info.plists: iPlug finds the macOS bundle (AU view, web UI) by it.
-#define BUNDLE_NAME "AngryPigDynamicSaturation"
+#define BUNDLE_NAME "AngryPigSpike"
 #define BUNDLE_MFR "AngryPigLab"
 #define BUNDLE_DOMAIN "com"
 
@@ -34,8 +34,8 @@
 #define AUV2_ENTRY AngryPigSpike_Entry
 #define AUV2_ENTRY_STR "AngryPigSpike_Entry"
 #define AUV2_FACTORY AngryPigSpike_Factory
-#define AUV2_VIEW_CLASS AngryPigDynSat_View
-#define AUV2_VIEW_CLASS_STR "AngryPigDynSat_View"
+#define AUV2_VIEW_CLASS AngryPig111_View
+#define AUV2_VIEW_CLASS_STR "AngryPig111_View"
 
 #define AAX_TYPE_IDS 'IPWV'
 #define AAX_TYPE_IDS_AUDIOSUITE 'IPWA'

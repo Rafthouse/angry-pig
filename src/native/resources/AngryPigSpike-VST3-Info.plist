@@ -7,9 +7,9 @@
 	<key>CFBundleExecutable</key>
 	<string>AngryPigSpike</string>
 	<key>CFBundleGetInfoString</key>
-	<string>Angry Pig Dynamic Saturation 1.1.1 beta 1 Copyright 2026 Mykyta Shchur</string>
+	<string>Angry Pig 1.1.1 Copyright 2026 Mykyta Shchur</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.AngryPigLab.vst3.AngryPigDynamicSaturation</string>
+	<string>com.AngryPigLab.vst3.AngryPigSpike</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -19,7 +19,7 @@
 	<key>CFBundleShortVersionString</key>
 	<string>1.1.1</string>
 	<key>CFBundleSignature</key>
-	<string>APd2</string>
+	<string>APm1</string>
 	<key>CFBundleVersion</key>
 	<string>1.1.1</string>
 	<key>CSResourcesFileMapped</key>
