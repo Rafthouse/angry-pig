@@ -28,6 +28,17 @@ iplug_add_plugin(AngryPigSpike SOURCES ${AP_EXTRA} AngryPigSpike.cpp AngryPigSpi
 if(MSVC)
  target_compile_options(AngryPigSpike-vst3 PRIVATE /fp:strict)
 endif()
+# Objective-C class names are global in a host process. Angry Pig 1.0.0 uses the default
+# prefix vAngryPigSpike, so this plug-in needs its own to load next to it.
+if(APPLE)
+ foreach(t AngryPigSpike-vst3 AngryPigSpike-au)
+  if(TARGET ${t})
+   get_target_property(ap_defs ${t} COMPILE_DEFINITIONS)
+   list(TRANSFORM ap_defs REPLACE "^OBJC_PREFIX=.*$" "OBJC_PREFIX=vAngryPigDynSat")
+   set_property(TARGET ${t} PROPERTY COMPILE_DEFINITIONS ${ap_defs})
+  endif()
+ endforeach()
+endif()
 
 if(WIN32)
 add_custom_command(TARGET AngryPigSpike-vst3 POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/resources/web ${CMAKE_BINARY_DIR}/out/AngryPigSpike.vst3/Contents/Resources/web)

@@ -33,7 +33,9 @@ AngryPigSpike::AngryPigSpike(const InstanceInfo& info):Plugin(info,MakeConfig(4,
 #endif
  LoadFile(index.string().c_str(),nullptr);
 #else
- LoadIndexHtml(__FILE__,GetBundleID());
+ // The bundles ship as AngryPigDynamicSaturation (see the Info.plists), not under the
+ // compile-time BUNDLE_NAME, so look the web UI up by the identifier they really carry.
+ LoadFile("index.html",BUNDLE_DOMAIN "." BUNDLE_MFR "." API_EXT ".AngryPigDynamicSaturation");
 #endif
  EnableScroll(false); };
  #if AP_TIMING

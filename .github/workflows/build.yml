@@ -181,6 +181,15 @@ jobs:
             codesign --verify --deep --strict --verbose=2 "$b"
           done
           /usr/libexec/PlistBuddy -c "Print :AudioComponents:0:subtype" rel/AngryPigDynamicSaturation.component/Contents/Info.plist | grep -qx APd2
+          # The editor loads index.html through these identifiers (AngryPigSpike.cpp).
+          grep -qx com.AngryPigLab.vst3.AngryPigDynamicSaturation out/bundle-ids.txt
+          grep -qx com.AngryPigLab.audiounit.AngryPigDynamicSaturation out/bundle-ids.txt
+          # No Objective-C class may share a name with Angry Pig 1.0.0 (prefix vAngryPigSpike).
+          for b in rel/AngryPigDynamicSaturation.vst3 rel/AngryPigDynamicSaturation.component; do
+            nm -U "$b/Contents/MacOS/AngryPigSpike" | grep 'OBJC_CLASS_\$_' | sort -u | tee -a out/objc-classes.txt
+            if nm -U "$b/Contents/MacOS/AngryPigSpike" | grep 'OBJC_CLASS_\$_' | grep -q 'vAngryPigSpike\|AngryPigSpike_View'; then exit 1; fi
+            nm -U "$b/Contents/MacOS/AngryPigSpike" | grep 'OBJC_CLASS_\$_' | grep -q 'vAngryPigDynSat'
+          done
 
       - name: Package PKG and ZIP
         run: |

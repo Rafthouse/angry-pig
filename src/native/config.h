@@ -33,8 +33,8 @@
 #define AUV2_ENTRY AngryPigSpike_Entry
 #define AUV2_ENTRY_STR "AngryPigSpike_Entry"
 #define AUV2_FACTORY AngryPigSpike_Factory
-#define AUV2_VIEW_CLASS AngryPigSpike_View
-#define AUV2_VIEW_CLASS_STR "AngryPigSpike_View"
+#define AUV2_VIEW_CLASS AngryPigDynSat_View
+#define AUV2_VIEW_CLASS_STR "AngryPigDynSat_View"
 
 #define AAX_TYPE_IDS 'IPWV'
 #define AAX_TYPE_IDS_AUDIOSUITE 'IPWA'
