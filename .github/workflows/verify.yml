@@ -1,8 +1,7 @@
 # Verification workflow for the Angry Pig public repository.
 #
-# This repository does not contain the plugin source code, so no job here builds the
-# plugin. The jobs below check the documentation, the installer script and the
-# published Windows release assets. macOS build jobs are not configured yet.
+# Checks the documentation, the 1.0.0 installer script and published release assets.
+# Plugin builds for Windows and macOS are in build.yml.
 name: verify
 
 on:
@@ -55,13 +54,19 @@ jobs:
         run: |
           $tag = if ($env:GITHUB_EVENT_NAME -eq 'release') { $env:GITHUB_REF_NAME } else { 'v1.0.0' }
           gh release download $tag --repo "$env:GITHUB_REPOSITORY" --dir assets --pattern 'AngryPig-*'
+          gh release download $tag --repo "$env:GITHUB_REPOSITORY" --dir sums --pattern 'SHA256SUMS*.txt'
+          if (-not (Test-Path sums)) { New-Item -ItemType Directory sums | Out-Null }
+          $global:LASTEXITCODE = 0  # a release without its own checksum file falls back to docs/SHA256SUMS.txt
       - name: Compare checksums
         shell: pwsh
         run: |
+          # A release that ships its own SHA256SUMS*.txt is checked against those; 1.0.0 uses docs/SHA256SUMS.txt.
+          $sumFiles = @(Get-ChildItem sums -Filter 'SHA256SUMS*.txt' -ErrorAction SilentlyContinue)
+          if ($sumFiles.Count -eq 0) { $sumFiles = @(Get-Item docs/SHA256SUMS.txt) }
           $expected = @{}
-          Get-Content docs/SHA256SUMS.txt | Where-Object { $_ -match '^[0-9A-Fa-f]{64}\s' } | ForEach-Object {
+          Get-Content $sumFiles.FullName | Where-Object { $_ -match '^[0-9A-Fa-f]{64}\s' } | ForEach-Object {
             $parts = $_ -split '\s+', 2
-            $expected[$parts[1].Trim()] = $parts[0].ToUpper()
+            $expected[$parts[1].Trim().TrimStart('*')] = $parts[0].ToUpper()
           }
           $failed = $false
           foreach ($name in $expected.Keys) {
