@@ -1,6 +1,6 @@
-# Building Angry Pig Dynamic Saturation
+# Building Angry Pig
 
-This tree builds the **Angry Pig Dynamic Saturation 1.1.1 beta** (VST3 class ID `APLb`/`APd2`) from a clean checkout on Windows and macOS. It does not build or change Angry Pig 1.0.0.
+This tree builds **Angry Pig 1.1.1** (VST3 class ID `APLb`/`APm1`, the same as 1.0.0) from a clean checkout on Windows and macOS: the Windows VST3 and the universal macOS VST3 and Audio Unit.
 
 Everything the build needs is in the repository or pinned by version and SHA-256:
 
@@ -29,10 +29,10 @@ cmake --build build --config Release --target AngryPigSpike-vst3
 The bundle is `build\out\AngryPigSpike.vst3`. Package it (Setup.exe, portable ZIP, SHA256SUMS.txt):
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File installer\windows-dyn-sat\build-packages.ps1 -Bundle build\out\AngryPigSpike.vst3 -OutDir pkg -Version 1.1.1-Beta
+powershell -ExecutionPolicy Bypass -File installer\windows\build-packages.ps1 -Bundle build\out\AngryPigSpike.vst3 -OutDir pkg -Version 1.1.1
 ```
 
-The packages install the bundle as `AngryPigDynamicSaturation.vst3`, next to Angry Pig 1.0.0 (`AngryPigSpike.vst3`). Only the bundle and DLL are renamed; their bytes are unchanged.
+The packages install the bundle unchanged as `AngryPigSpike.vst3`, the bundle name of 1.0.0. The setup backs up an installed 1.0.0 before it replaces it.
 
 ## macOS (universal VST3 and AUv2)
 
@@ -46,13 +46,14 @@ cmake -S src/native -B build -G Xcode \
 cmake --build build --config Release
 ```
 
-The release workflow renames the bundles to `AngryPigDynamicSaturation.vst3` and `AngryPigDynamicSaturation.component`, ad-hoc signs them and builds the PKG and ZIP. See `.github/workflows/build.yml`.
+The release workflow ad-hoc signs `AngryPigSpike.vst3` and `AngryPigSpike.component` and builds the PKG (package identifier `com.angrypiglab.angrypig`, the same as 1.0.0, with `installer/macos/scripts/preinstall`) and the ZIP. See `.github/workflows/build.yml`.
 
 ## Tests
 
 | Test | Command |
 | --- | --- |
-| Isolated install / uninstall / reinstall (Windows) | `tools\qa\windows-install-qa.ps1 -SetupExe <Setup.exe> -ExpectedDllSha256 <sha> -Work <empty folder>` |
+| Isolated install / uninstall / reinstall (Windows) | `tools\qa\windows-install-qa.ps1 -SetupExe <Setup.exe> -ExpectedDllSha256 <sha> -Work <empty folder>`; add `-UpgradeFrom <1.0.0 AngryPigSpike.vst3> -UpgradeFromDllSha256 <sha>` for the upgrade from 1.0.0 |
+| Measurement tables and plots (`docs/measurements`) | `python tools/measurements/measure.py <parity_render> <AngryPigSpike.vst3> <out dir>` |
 | DSP metrics of a render (halo, LF, odd harmonics, DC) | `python tools/parity/gen_sine.py sine.wav 44100 999 -12 10.54421768707483`, render with `tools/parity/parity_render`, then `python tools/parity/halo_metrics.py out.wav --expect tools/parity/reference/windows-x64-sine999-m12-anger100.json` |
 | Cross-platform render comparison | `python tools/parity/compare_wav.py mac.wav windows.wav 1e-4` |
 | CPU profile of the DSP engine (x86-64) | build `tools/perf-bench/bench.cpp` with `/O2 /fp:strict`, run `bench time` and `bench compare` |

@@ -1,5 +1,7 @@
 # Angry Pig Dynamic Saturation 1.1.1 beta 1 (pre-release)
 
+> **Superseded by [Angry Pig 1.1.1](RELEASE_NOTES_1.1.1.md).** 1.1.1 has the same audio output, replaces Angry Pig 1.0.0 and uses the 1.0.0 plugin ID. This page is kept as the record of the beta.
+
 **Experimental beta. Not a replacement for Angry Pig 1.0.0.** This is a separate plug-in, "Angry Pig Dynamic Saturation (candidate)", with its own VST3 class ID (`APd2`). It installs next to Angry Pig 1.0.0 and does not change it. Angry Pig 1.0.0 stays the current stable release.
 
 ## What is new compared with 1.0.0
