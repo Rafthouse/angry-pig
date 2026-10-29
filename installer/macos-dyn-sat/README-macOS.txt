@@ -9,8 +9,10 @@ Plugin name "Angry Pig Dynamic Saturation (candidate)". Gain range -36 to +36 dB
 Angry Pig 1.0.0 (AngryPigSpike.vst3 / AngryPigSpike.component) is a different bundle and is not replaced.
 
 Install with the PKG (recommended)
-  Open AngryPig-DynamicSaturation-1.1.1-Beta-macOS.pkg. The package is not notarized, so macOS may block it:
-  right-click the file, choose Open, then confirm. It installs into /Library/Audio/Plug-Ins/VST3 and /Components.
+  Open AngryPig-DynamicSaturation-1.1.1-Beta-macOS.pkg. The package is not notarized, so macOS blocks it the
+  first time. Verify the checksum, then open System Settings > Privacy & Security and choose Open Anyway for
+  this file (on macOS 14 and earlier, right-click the file and choose Open also works). Do not disable
+  Gatekeeper. It installs into /Library/Audio/Plug-Ins/VST3 and /Library/Audio/Plug-Ins/Components.
 
 Install by hand (ZIP)
   1. Quit all DAWs.
