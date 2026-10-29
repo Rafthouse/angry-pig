@@ -240,6 +240,11 @@ jobs:
       - name: auval
         run: |
           set +e
+          # A freshly installed component is only found after the registrar rescans.
+          sudo killall -9 AudioComponentRegistrar 2>/dev/null
+          auval -a > logs/auval-list.txt 2>&1
+          grep "APd2" logs/auval-list.txt
+          nm -gU /Library/Audio/Plug-Ins/Components/AngryPigDynamicSaturation.component/Contents/MacOS/AngryPigSpike | grep -E "_Factory|_Entry"
           auval -v aufx APd2 APLb > logs/auval.txt 2>&1
           echo "exit $?" >> logs/auval.txt
           set -e
