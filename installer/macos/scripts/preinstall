@@ -1,0 +1,5 @@
+#!/bin/sh
+# Angry Pig 1.1.1 replaces the plug-in bundles of Angry Pig 1.0.0 (same names and class ID).
+# Remove the old bundles first so no file of 1.0.0 stays inside the new, signed bundles.
+rm -rf "/Library/Audio/Plug-Ins/VST3/AngryPigSpike.vst3" "/Library/Audio/Plug-Ins/Components/AngryPigSpike.component"
+exit 0

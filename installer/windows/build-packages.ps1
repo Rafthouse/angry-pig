@@ -1,15 +1,15 @@
 #requires -Version 5.1
 <#
 .SYNOPSIS
-  Builds the Angry Pig Dynamic Saturation Windows packages from a built VST3 bundle.
+  Builds the Angry Pig Windows packages from a built VST3 bundle.
 .DESCRIPTION
-  Input is the bundle produced by the CMake build (build\out\AngryPigSpike.vst3). The bundle is
-  copied under its release name AngryPigDynamicSaturation.vst3, so it installs next to Angry Pig 1.0.0
-  (AngryPigSpike.vst3) instead of over it. File bytes are not changed; only the bundle and DLL are renamed.
+  Input is the bundle produced by the CMake build (build\out\AngryPigSpike.vst3). It is packaged
+  unchanged under its own name, AngryPigSpike.vst3, the bundle name of Angry Pig 1.0.0, so it
+  replaces 1.0.0 (the setup backs 1.0.0 up first).
 
   Output in -OutDir:
-    AngryPig-DynamicSaturation-<Version>-Windows-Setup.exe     IExpress setup (AngryPig-Setup.ps1 + AngryPig-Install.ps1)
-    AngryPig-DynamicSaturation-<Version>-Windows-Portable.zip  bundle + readme + third-party notices
+    AngryPig-Setup-<Version>-UNSIGNED.exe   IExpress setup (AngryPig-Setup.ps1 + AngryPig-Install.ps1)
+    AngryPig-Windows-VST3-<Version>.zip     bundle + readme + third-party notices
     SHA256SUMS.txt
 
   Needs: Windows PowerShell 5.1, 7-Zip (7z.exe), iexpress.exe (part of Windows).
@@ -17,7 +17,7 @@
 param(
     [Parameter(Mandatory = $true)][string]$Bundle,
     [Parameter(Mandatory = $true)][string]$OutDir,
-    [string]$Version = '1.1.1-Beta',
+    [string]$Version = '1.1.1',
     [string]$Notices = '',
     [string]$SevenZip = ''
 )
@@ -32,7 +32,7 @@ if (-not (Test-Path -LiteralPath $SevenZip)) { throw "7z.exe not found: $SevenZi
 $iexpress = Join-Path $env:SystemRoot 'System32\iexpress.exe'
 if (-not (Test-Path -LiteralPath $iexpress)) { throw "iexpress.exe not found: $iexpress" }
 
-$name = 'AngryPigDynamicSaturation'
+$name = 'AngryPigSpike'
 $srcDll = Join-Path $Bundle 'Contents\x86_64-win\AngryPigSpike.vst3'
 if (-not (Test-Path -LiteralPath $srcDll -PathType Leaf)) { throw "Bundle DLL not found: $srcDll" }
 
@@ -45,12 +45,11 @@ $stage = Join-Path $work 'stage'
 $portableRoot = Join-Path $work 'portable'
 New-Item -ItemType Directory -Force -Path $payloadSrc, $stage, $portableRoot | Out-Null
 
-# 1. Release bundle: same bytes, release name.
+# 1. Release bundle: the built bundle, unchanged.
 $relBundle = Join-Path $payloadSrc "$name.vst3"
 Copy-Item -Recurse -LiteralPath $Bundle -Destination $relBundle
-Rename-Item -LiteralPath (Join-Path $relBundle 'Contents\x86_64-win\AngryPigSpike.vst3') -NewName "$name.vst3"
 $dllHash = (Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $relBundle "Contents\x86_64-win\$name.vst3")).Hash
-if ($dllHash -ne (Get-FileHash -Algorithm SHA256 -LiteralPath $srcDll).Hash) { throw 'DLL changed while renaming' }
+if ($dllHash -ne (Get-FileHash -Algorithm SHA256 -LiteralPath $srcDll).Hash) { throw 'DLL changed while copying' }
 
 # 2. Manifest (SHA-256 of every bundle file), read by AngryPig-Install.ps1.
 $files = Get-ChildItem -LiteralPath $relBundle -Recurse -File | Sort-Object FullName | ForEach-Object {
@@ -66,7 +65,7 @@ Push-Location $payloadSrc
 Pop-Location
 if ($LASTEXITCODE -ne 0) { throw '7z failed for payload.zip' }
 
-$setupExe = Join-Path $OutDir "AngryPig-DynamicSaturation-$Version-Windows-Setup.exe"
+$setupExe = Join-Path $OutDir "AngryPig-Setup-$Version-UNSIGNED.exe"
 if (Test-Path -LiteralPath $setupExe) { Remove-Item -Force -LiteralPath $setupExe }
 $sed = @"
 [Version]
@@ -85,7 +84,7 @@ InstallPrompt=
 DisplayLicense=
 FinishMessage=
 TargetName=$setupExe
-FriendlyName=Angry Pig Dynamic Saturation $Version Setup
+FriendlyName=Angry Pig $Version Setup
 AppLaunched=powershell.exe -NoProfile -ExecutionPolicy RemoteSigned -WindowStyle Hidden -File AngryPig-Setup.ps1
 PostInstallCmd=<None>
 AdminQuietInstCmd=
@@ -110,7 +109,7 @@ $p = Start-Process -FilePath $iexpress -ArgumentList @('/N', '/Q', $sedPath) -Wa
 if (-not (Test-Path -LiteralPath $setupExe)) { throw "IExpress did not produce $setupExe (exit $($p.ExitCode))" }
 
 # 4. Portable ZIP.
-$portName = "AngryPig-DynamicSaturation-$Version-Windows-Portable"
+$portName = "AngryPig-Windows-VST3-$Version"
 $portDir = Join-Path $portableRoot $portName
 New-Item -ItemType Directory -Force -Path $portDir | Out-Null
 Copy-Item -Recurse -LiteralPath $relBundle -Destination $portDir

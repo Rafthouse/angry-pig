@@ -2,3 +2,5 @@
 src/** -text
 deps/** binary
 notices/** -text
+# Shell scripts run by the macOS installer must keep LF line endings.
+installer/macos/scripts/** text eol=lf

@@ -24,22 +24,25 @@ jobs:
         run: python3 .github/scripts/check_repo.py
 
   installer-script:
-    name: Installer script parses (Windows PowerShell)
+    name: Installer scripts parse (Windows PowerShell)
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Parse AngryPig-Install.ps1
+      - name: Parse the 1.0.0 and current installer and QA scripts
         shell: pwsh
         run: |
-          $errors = $null
-          $tokens = $null
-          [System.Management.Automation.Language.Parser]::ParseFile(
-            (Join-Path $env:GITHUB_WORKSPACE 'installer/AngryPig-Install.ps1'), [ref]$tokens, [ref]$errors) | Out-Null
-          if ($errors -and $errors.Count -gt 0) {
-            $errors | ForEach-Object { Write-Error $_.Message }
-            exit 1
+          $bad = 0
+          foreach ($p in @('installer/AngryPig-Install.ps1') + @(Get-ChildItem installer/windows, tools/qa -Filter *.ps1 | ForEach-Object { $_.FullName })) {
+            $errors = $null
+            $tokens = $null
+            [System.Management.Automation.Language.Parser]::ParseFile(
+              (Join-Path $env:GITHUB_WORKSPACE $p), [ref]$tokens, [ref]$errors) | Out-Null
+            if ($errors -and $errors.Count -gt 0) {
+              $errors | ForEach-Object { Write-Error "${p}: $($_.Message)" }
+              $bad++
+            } else { Write-Output "parses: $p" }
           }
-          Write-Output 'Installer script parses without errors.'
+          if ($bad) { exit 1 }
 
   release-assets:
     name: Published Windows assets match SHA256SUMS.txt

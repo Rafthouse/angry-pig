@@ -1,7 +1,7 @@
 #requires -Version 5.1
 <#
 .SYNOPSIS
-  Angry Pig Dynamic Saturation 1.1.1 Beta 1 setup window (Windows PowerShell 5.1, WinForms).
+  Angry Pig 1.1.1 setup window (Windows PowerShell 5.1, WinForms).
 .DESCRIPTION
   Shipped inside the self-extracting setup EXE, next to AngryPig-Install.ps1 and payload.zip.
   The window only drives AngryPig-Install.ps1; the install logic stays in that script.
@@ -9,7 +9,7 @@
 #>
 param(
     [string]$VST3Root = (Join-Path $env:CommonProgramFiles 'VST3'),
-    [string]$DataRoot = (Join-Path $env:ProgramData 'AngryPigDynamicSaturation-Beta1'),
+    [string]$DataRoot = (Join-Path $env:ProgramData 'AngryPig'),
     [switch]$SelfTest,
     [string]$Shot = ''
 )
@@ -25,7 +25,7 @@ $payloadRoot = Join-Path $here 'payload'
 if (-not (Test-Path -LiteralPath $payloadRoot)) {
     Expand-Archive -LiteralPath $payloadZip -DestinationPath $payloadRoot
 }
-$bundleTarget = Join-Path $VST3Root 'AngryPigDynamicSaturation.vst3'
+$bundleTarget = Join-Path $VST3Root 'AngryPigSpike.vst3'
 $needsAdmin = $VST3Root.StartsWith($env:ProgramFiles, [StringComparison]::OrdinalIgnoreCase)
 
 function Test-Admin {
@@ -74,7 +74,7 @@ function Get-Message([int]$Code) {
         0 { 'Done.' }
         1 { 'Unexpected error. See the log for details: ' + (Join-Path $DataRoot 'install.log') }
         2 { 'The package failed its integrity check. Nothing was changed. Get a fresh copy of the setup.' }
-        3 { 'A different AngryPigDynamicSaturation.vst3 is installed. It must be replaced to continue.' }
+        3 { 'A different AngryPigSpike.vst3 (for example Angry Pig 1.0.0) is installed. It must be replaced to continue.' }
         4 { 'Tick the terms checkbox before installing.' }
         5 { 'Administrator permission is required for the VST3 folder. Nothing was changed.' }
         6 { 'The copied bundle failed verification. The previous state was restored when a backup existed.' }
@@ -128,7 +128,7 @@ function New-Button([string]$Text, [int]$X, [int]$Y, [int]$W, [Drawing.Color]$Ba
 }
 
 $form = New-Object Windows.Forms.Form
-$form.Text = 'Angry Pig Dynamic Saturation 1.1.1 Beta 1 Setup'
+$form.Text = 'Angry Pig 1.1.1 Setup'
 $form.StartPosition = 'CenterScreen'
 $form.FormBorderStyle = 'FixedDialog'
 $form.MaximizeBox = $false
@@ -136,7 +136,7 @@ $form.BackColor = $bg
 $form.ClientSize = New-Object Drawing.Size(600, 530)
 
 $title = New-Label 'ANGRY PIG' 24 16 552 44 $gold 26 'Bold'
-$subtitle = New-Label 'Windows VST3 - Dynamic Saturation 1.1.1 Beta 1 - unsigned - Created by Mykyta Shchur' 26 62 552 20 $muted 9 'Regular'
+$subtitle = New-Label 'Windows VST3 - 1.1.1 - unsigned - Created by Mykyta Shchur' 26 62 552 20 $muted 9 'Regular'
 $accentBar = New-Object Windows.Forms.Panel
 $accentBar.Location = New-Object Drawing.Point(0, 92)
 $accentBar.Size = New-Object Drawing.Size(600, 4)
@@ -194,14 +194,14 @@ function Update-View {
 }
 
 function Confirm-Action([string]$Text) {
-    [Windows.Forms.MessageBox]::Show($Text, 'Angry Pig Dynamic Saturation 1.1.1 Beta 1 Setup', 'YesNo', 'Question') -eq 'Yes'
+    [Windows.Forms.MessageBox]::Show($Text, 'Angry Pig 1.1.1 Setup', 'YesNo', 'Question') -eq 'Yes'
 }
 
 $btnInstall.Add_Click({
     if (-not $accept.Checked) { Set-Message (Get-Message 4); return }
     $replace = $false
     if ((Get-StateKind) -eq 'other') {
-        if (-not (Confirm-Action 'A different AngryPigDynamicSaturation.vst3 is installed. It will be copied to ProgramData\AngryPigDynamicSaturation-Beta1\backup and replaced. Continue?')) { return }
+        if (-not (Confirm-Action 'A different AngryPigSpike.vst3 is installed (for example Angry Pig 1.0.0). It will be copied to ProgramData\AngryPig\backup and replaced by 1.1.1. Continue?')) { return }
         $replace = $true
     }
     $r = Invoke-Setup 'Install' $replace
@@ -214,7 +214,7 @@ $btnInstall.Add_Click({
 $btnUninstall.Add_Click({
     $kind = Get-StateKind
     if ($kind -eq 'missing') { Set-Message 'Nothing to remove.'; return }
-    if (-not (Confirm-Action 'Remove Angry Pig Dynamic Saturation from the VST3 folder? A backup copy stays in ProgramData\AngryPigDynamicSaturation-Beta1\backup.')) { return }
+    if (-not (Confirm-Action 'Remove Angry Pig from the VST3 folder? Earlier backups stay in ProgramData\AngryPig\backup.')) { return }
     $r = Invoke-Setup 'Uninstall' ($kind -ne 'rc1')
     Add-Log ('Uninstall -> code ' + $r.Code)
     Add-Log $r.Text
