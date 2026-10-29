@@ -215,9 +215,18 @@ jobs:
           cp -R rel/AngryPigSpike.component stage/Library/Audio/Plug-Ins/Components/
           # Same package identifier as the 1.0.0 PKG, so the upgrade replaces its receipt. Bundles are
           # not relocatable: the installer must not follow a copy of the bundle ID elsewhere on disk.
-          pkgbuild --analyze --root stage out/component.plist
-          n=$(/usr/libexec/PlistBuddy -c "Print" out/component.plist | grep -c "RootRelativeBundlePath")
-          for i in $(seq 0 $((n - 1))); do /usr/libexec/PlistBuddy -c "Set :$i:BundleIsRelocatable false" out/component.plist; done
+          {
+            echo '<?xml version="1.0" encoding="UTF-8"?>'
+            echo '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">'
+            echo '<plist version="1.0"><array>'
+            for b in VST3/AngryPigSpike.vst3 Components/AngryPigSpike.component; do
+              echo "<dict><key>BundleHasStrictIdentifier</key><true/><key>BundleIsRelocatable</key><false/>"
+              echo "<key>BundleIsVersionChecked</key><false/><key>BundleOverwriteAction</key><string>upgrade</string>"
+              echo "<key>RootRelativeBundlePath</key><string>Library/Audio/Plug-Ins/$b</string></dict>"
+            done
+            echo '</array></plist>'
+          } > out/component.plist
+          plutil -lint out/component.plist && cat out/component.plist
           chmod +x installer/macos/scripts/preinstall
           pkgbuild --root stage --component-plist out/component.plist --scripts installer/macos/scripts \
             --identifier com.angrypiglab.angrypig --version "${VERSION%%-*}" --install-location / "pkg/AngryPig-$VERSION-macOS.pkg"

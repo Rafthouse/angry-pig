@@ -32,11 +32,11 @@ jobs:
         shell: pwsh
         run: |
           $bad = 0
-          foreach ($p in @('installer/AngryPig-Install.ps1') + @(Get-ChildItem installer/windows, tools/qa -Filter *.ps1 | ForEach-Object { $_.FullName })) {
+          $scripts = @(Get-Item installer/AngryPig-Install.ps1) + @(Get-ChildItem installer/windows, tools/qa -Filter *.ps1)
+          foreach ($p in $scripts.FullName) {
             $errors = $null
             $tokens = $null
-            [System.Management.Automation.Language.Parser]::ParseFile(
-              (Join-Path $env:GITHUB_WORKSPACE $p), [ref]$tokens, [ref]$errors) | Out-Null
+            [System.Management.Automation.Language.Parser]::ParseFile($p, [ref]$tokens, [ref]$errors) | Out-Null
             if ($errors -and $errors.Count -gt 0) {
               $errors | ForEach-Object { Write-Error "${p}: $($_.Message)" }
               $bad++
