@@ -12,8 +12,9 @@ The processing is applied per sample, in this order.
 2. **COLOR filter** (implementation). A peaking filter. Its centre frequency and boost are set by COLOR. See [Controls](controls.md).
 3. **Drive gain** (implementation). A linear gain set by ANGER and GAIN, plus a fixed +1.0 dB base gain.
 4. **Level detector and gain reduction** (implementation). Peak detection on both channels, linked. Attack time constant 2.45 ms, release time constant 30 ms. Hard-knee reduction above a threshold set by ANGER. See [Controls](controls.md#anger-0-to-100--default-0-).
-5. **Saturation** (implementation). A memoryless waveshaping curve. See [Saturation and harmonics](saturation.md).
-6. **Bypass** (implementation). When BYPASS is on, the input is passed through unchanged.
+5. **Dynamic saturation** (implementation, new in 1.1.1). A slow bias and a level-dependent, low-frequency modulation are added to the signal before the curve. See [Dynamic saturation](dynamic-saturation.md).
+6. **Saturation** (implementation). A memoryless waveshaping curve. See [Saturation and harmonics](saturation.md).
+7. **Bypass** (implementation). When BYPASS is on, the input is passed through unchanged.
 
 Parameter changes are smoothed with a time constant of about 6 ms, so moving a control does not produce clicks.
 

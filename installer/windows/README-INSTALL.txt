@@ -31,8 +31,8 @@ How to use
   2. Install. Administrator permission is requested once (the VST3 folder is under Program Files).
   3. Restart your DAW or plugin host and rescan plugins.
   4. Uninstall removes AngryPigSpike.vst3. Backups stay in C:\ProgramData\AngryPig\backup\.
-  5. To go back to 1.0.0, run the 1.0.0 setup, or restore its backup:
-       powershell -ExecutionPolicy Bypass -File AngryPig-Install.ps1 -Action Rollback -BackupPath C:\ProgramData\AngryPig\backup\<stamp>
+  5. To go back to 1.0.0, run the 1.0.0 setup, or close all hosts, delete the installed
+     AngryPigSpike.vst3 and copy AngryPigSpike.vst3 from C:\ProgramData\AngryPig\backup\<stamp>     back to C:\Program Files\Common Files\VST3\.
   6. Reinstall is the same as Install. Refresh shows the current state.
 
 Exit codes and the log are described in the header of AngryPig-Install.ps1.
