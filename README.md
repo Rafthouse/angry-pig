@@ -82,8 +82,15 @@ The Plugin Doctor linear view differs from the harness frequency response below 
 | Windows 10 and 11, 64-bit | VST3 (installer and bundle) | **Released** in [1.0.0](https://github.com/Rafthouse/angry-pig/releases/tag/v1.0.0) |
 | macOS, Apple Silicon and Intel | VST3 (universal PKG and DMG) | **Available, validation pending.** Installation and pluginval passed on Apple Silicon and Intel runners. DAW and GUI smoke tests not yet run. Not notarized. |
 | macOS | Audio Unit (AUv2) | **Not included in 1.0.0** |
+| Windows and macOS | Dynamic Saturation beta (VST3, AUv2 on macOS) | **Pre-release** [1.1.1 beta 1](https://github.com/Rafthouse/angry-pig/releases/tag/v1.1.1-dyn-sat-beta1), see below |
 
 Each release lists the SHA-256 checksum of every file. Check the checksum before you run an installer.
+
+### Dynamic Saturation 1.1.1 beta 1 (pre-release)
+
+An experimental, separate plug-in, **Angry Pig Dynamic Saturation (candidate)**. It installs next to Angry Pig 1.0.0 and does not replace or change it. The saturation follows the signal level, and GAIN goes from -36 to +36 dB. Windows: VST3 installer and ZIP. macOS: universal VST3 and Audio Unit, PKG and ZIP, not notarized and not yet tested on a physical Mac.
+
+Install, uninstall and limitations: [release notes](docs/RELEASE_NOTES_1.1.1-dyn-sat-beta1.md). Tests: [verification record](docs/dyn-sat/VERIFICATION.md). Build it yourself: [BUILDING.md](BUILDING.md).
 
 ## Installation
 
@@ -155,7 +162,7 @@ Created by **Mykyta Shchur**. © 2026 Mykyta Shchur. The interface, visual desig
 
 Angry Pig uses third-party components, including the iPlug 2 framework and the VST 3 SDK. They are listed with their licenses in [docs/THIRD_PARTY_NOTICES.md](docs/THIRD_PARTY_NOTICES.md). The full license texts are in the Windows bundle and in the `THIRD_PARTY_NOTICES.txt` file attached to the release. The macOS 1.0.0 packages do not contain them.
 
-**Source code is not published in this repository and is not licensed for reuse.** The author retains all rights to the source code and artwork. The compiled plugin is free to download and use. Redistribution terms beyond free binary distribution have not been published.
+**The source code of the Dynamic Saturation beta is published in this repository (`src/`) so that the builds can be checked and reproduced. It is not licensed for reuse:** no open-source license has been granted, and the author retains all rights to the source code and artwork. The compiled plugin is free to download and use. Redistribution terms beyond free binary distribution have not been published.
 
 ## Feedback
 
