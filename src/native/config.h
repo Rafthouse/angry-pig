@@ -9,7 +9,8 @@
 #define PLUG_COPYRIGHT_STR "Created by Mykyta Shchur"
 #define PLUG_CLASS_NAME AngryPigSpike
 
-#define BUNDLE_NAME "AngryPigSpike"
+// Must match CFBundleIdentifier in the Info.plists: iPlug finds the macOS bundle (AU view, web UI) by it.
+#define BUNDLE_NAME "AngryPigDynamicSaturation"
 #define BUNDLE_MFR "AngryPigLab"
 #define BUNDLE_DOMAIN "com"
 
