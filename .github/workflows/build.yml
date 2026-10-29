@@ -1,0 +1,306 @@
+name: build
+
+# Builds Angry Pig Dynamic Saturation from a clean checkout on Windows and macOS, validates it,
+# packages it, and checks that macOS renders match the Windows render. Nothing is published here.
+# Every external download is pinned by version and SHA-256.
+
+on:
+  push:
+    branches: [ "release/**" ]
+    paths-ignore: [ "docs/**", "*.md" ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Package version
+        required: true
+        default: "1.1.1-Beta"
+
+permissions:
+  contents: read
+
+env:
+  VERSION: ${{ inputs.version || '1.1.1-Beta' }}
+  IPLUG2_ARCHIVE_SHA256: ca6f2be74c522e5a8eeeac1859a356c09764f2cca0fad02d91bc3b0a439808bd
+  WEBVIEW2_VERSION: 1.0.2903.40
+  WEBVIEW2_SHA256: ef128016dd1e51c59178c827ed5b8aa3322c57afa8675d930f8109505542ad74
+  PLUGINVAL_VERSION: v1.0.4
+  PLUGINVAL_WIN_SHA256: c08e61ce3b96db41636f8ec7e76f4c7e2c13ebdac7fa1b5a1f52b4f32ec715ab
+  PLUGINVAL_MAC_SHA256: 3c4c533bda0c5059eea3ddaea752d757ee2025041f0f47e6bcb0e87f6082b29f
+
+jobs:
+  windows:
+    name: Windows x64 VST3 (build, validate, package, QA)
+    runs-on: windows-2022
+    timeout-minutes: 90
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Toolchain and source
+        run: |
+          New-Item -ItemType Directory -Force out, logs | Out-Null
+          cmake --version
+          git rev-parse HEAD | Tee-Object out/source-commit.txt
+
+      - name: Unpack pinned dependencies (iPlug2 with VST3 SDK, WebView2 SDK)
+        run: |
+          $h = (Get-FileHash deps/iplug2.tar.gz -Algorithm SHA256).Hash.ToLower()
+          if ($h -ne $env:IPLUG2_ARCHIVE_SHA256) { throw "iplug2.tar.gz SHA-256 mismatch: $h" }
+          New-Item -ItemType Directory -Force src/deps | Out-Null
+          tar -xzf deps/iplug2.tar.gz -C src/deps
+          Invoke-WebRequest "https://www.nuget.org/api/v2/package/Microsoft.Web.WebView2/$env:WEBVIEW2_VERSION" -OutFile "$env:RUNNER_TEMP/webview2.zip"
+          $w = (Get-FileHash "$env:RUNNER_TEMP/webview2.zip" -Algorithm SHA256).Hash.ToLower()
+          if ($w -ne $env:WEBVIEW2_SHA256) { throw "WebView2 package SHA-256 mismatch: $w" }
+          Expand-Archive "$env:RUNNER_TEMP/webview2.zip" -DestinationPath src/deps/webview2
+          if (-not (Test-Path src/deps/webview2/build/native/include/WebView2.h)) { throw 'WebView2.h missing' }
+
+      - name: Configure and build
+        run: |
+          cmake -S src/native -B build -G "Visual Studio 17 2022" -A x64
+          cmake --build build --config Release --target AngryPigSpike-vst3 --parallel
+          $dll = 'build/out/AngryPigSpike.vst3/Contents/x86_64-win/AngryPigSpike.vst3'
+          if (-not (Test-Path $dll)) { throw 'VST3 DLL missing' }
+          (Get-FileHash $dll -Algorithm SHA256).Hash | Tee-Object out/dll-sha256.txt
+
+      - name: Package (Setup.exe, portable ZIP, SHA256SUMS)
+        run: |
+          powershell -NoProfile -ExecutionPolicy Bypass -File installer/windows-dyn-sat/build-packages.ps1 -Bundle build/out/AngryPigSpike.vst3 -OutDir pkg -Version $env:VERSION
+          Remove-Item -Recurse -Force pkg/work
+
+      - name: Isolated install / uninstall / reinstall QA
+        run: |
+          $sha = (Get-Content out/dll-sha256.txt).Trim()
+          powershell -NoProfile -ExecutionPolicy Bypass -File tools/qa/windows-install-qa.ps1 -SetupExe "pkg/AngryPig-DynamicSaturation-$env:VERSION-Windows-Setup.exe" -ExpectedDllSha256 $sha -Work "$env:RUNNER_TEMP/qa" | Tee-Object logs/install-qa.txt
+          if ($LASTEXITCODE -ne 0) { throw "install QA failed ($LASTEXITCODE)" }
+
+      - name: Steinberg VST3 validator
+        run: |
+          $sdk = 'src/deps/iplug2/Dependencies/IPlug/VST3_SDK'
+          cmake -S $sdk -B vst3sdk -G "Visual Studio 17 2022" -A x64 -DSMTG_ENABLE_VSTGUI_SUPPORT=OFF -DSMTG_ADD_VSTGUI=OFF -DSMTG_ADD_VST3_PLUGINS_SAMPLES=OFF -DSMTG_ADD_VST3_HOSTING_SAMPLES=ON -DSMTG_RUN_VST_VALIDATOR=OFF
+          cmake --build vst3sdk --config Release --target validator --parallel
+          $b = (Resolve-Path "$env:RUNNER_TEMP/qa/payload/AngryPigDynamicSaturation.vst3").Path
+          & vst3sdk/bin/Release/validator.exe $b 2>&1 | Tee-Object logs/vst3-validator.txt
+          if (-not (Select-String -Path logs/vst3-validator.txt -Pattern 'Result: \d+ tests passed, 0 tests failed' -Quiet)) { throw 'VST3 validator reported failures' }
+          if (-not (Select-String -Path logs/vst3-validator.txt -Pattern 'cid = .*41504C6241506432' -Quiet)) { throw 'class ID is not APLb/APd2' }
+
+      - name: pluginval (pinned)
+        run: |
+          Invoke-WebRequest "https://github.com/Tracktion/pluginval/releases/download/$env:PLUGINVAL_VERSION/pluginval_Windows.zip" -OutFile "$env:RUNNER_TEMP/pv.zip"
+          $h = (Get-FileHash "$env:RUNNER_TEMP/pv.zip" -Algorithm SHA256).Hash.ToLower()
+          if ($h -ne $env:PLUGINVAL_WIN_SHA256) { throw "pluginval SHA-256 mismatch: $h" }
+          Expand-Archive "$env:RUNNER_TEMP/pv.zip" -DestinationPath "$env:RUNNER_TEMP/pv"
+          $b = (Resolve-Path "$env:RUNNER_TEMP/qa/payload/AngryPigDynamicSaturation.vst3").Path
+          & "$env:RUNNER_TEMP/pv/pluginval.exe" --strictness-level 8 --validate-in-process --validate $b 2>&1 | Tee-Object logs/pluginval.txt
+          if ($LASTEXITCODE -ne 0) { throw "pluginval failed ($LASTEXITCODE)" }
+
+      - name: Reference render and DSP metrics
+        run: |
+          $sdk = (Resolve-Path 'src/deps/iplug2/Dependencies/IPlug/VST3_SDK').Path
+          $vs = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath
+          cmd /c "`"$vs\VC\Auxiliary\Build\vcvars64.bat`" >nul && cl /nologo /O2 /EHsc /std:c++17 /MT /I `"$sdk`" tools\parity\parity_render.cpp `"$sdk\pluginterfaces\base\funknown.cpp`" `"$sdk\pluginterfaces\base\coreiids.cpp`" `"$sdk\pluginterfaces\base\ustring.cpp`" `"$sdk\pluginterfaces\base\conststringtable.cpp`" `"$sdk\public.sdk\source\vst\vstinitiids.cpp`" ole32.lib /Fe:out\parity_render.exe"
+          python tools/parity/gen_sine.py out/sine44.wav 44100 999 -12 10.54421768707483
+          python tools/parity/gen_input.py out/input.wav
+          $b = (Resolve-Path "$env:RUNNER_TEMP/qa/payload/AngryPigDynamicSaturation.vst3").Path
+          out/parity_render.exe vst3 $b out/sine44.wav out/win_sine44.wav 100 0 0 0 none
+          $env:AP_PARITY_BLOCK = '1'; out/parity_render.exe vst3 $b out/sine44.wav out/win_sine44_b1.wav 100 0 0 0 none; Remove-Item Env:AP_PARITY_BLOCK
+          out/parity_render.exe vst3 $b out/input.wav out/win_fixed.wav 60 40 -6 0 none
+          out/parity_render.exe vst3 $b out/input.wav out/win_ramp.wav 0 40 -6 0 anger-ramp
+          python -m pip install --quiet numpy
+          python tools/parity/halo_metrics.py out/win_sine44.wav --expect tools/parity/reference/windows-x64-sine999-m12-anger100.json | Tee-Object logs/dsp-metrics.txt
+          if ($LASTEXITCODE -ne 0) { throw 'DSP metrics differ from the reference' }
+          python tools/parity/halo_metrics.py out/win_sine44_b1.wav --ref out/win_sine44.wav | Tee-Object logs/dsp-block1.txt
+          if ($LASTEXITCODE -ne 0) { throw 'block size 1 differs from block size 512' }
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-packages
+          if-no-files-found: error
+          path: |
+            pkg/*
+            out/source-commit.txt
+            out/dll-sha256.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-renders
+          if-no-files-found: error
+          path: |
+            out/*.wav
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: windows-logs
+          path: logs
+
+  macos-build:
+    name: macOS universal VST3 + AU (build, package)
+    runs-on: macos-14
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Toolchain and source
+        run: |
+          mkdir -p out
+          sw_vers; xcodebuild -version; cmake --version; uname -m
+          git rev-parse HEAD | tee out/source-commit.txt
+
+      - name: Unpack pinned iPlug2 (with VST3 SDK)
+        run: |
+          echo "$IPLUG2_ARCHIVE_SHA256  deps/iplug2.tar.gz" | shasum -a 256 -c -
+          mkdir -p src/deps
+          tar -xzf deps/iplug2.tar.gz -C src/deps
+          test -f src/deps/iplug2/IPlug/AUv2/IPlugAU.cpp
+
+      - name: Configure and build (arm64 + x86_64)
+        run: |
+          cmake -S src/native -B build -G Xcode \
+            -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 \
+            -DIPLUG2_DIR="$PWD/src/deps/iplug2" -DIPLUG_DEPLOY_PLUGINS=OFF -DAP_BUILD_AU=ON
+          cmake --build build --config Release --parallel
+
+      - name: Release bundles (renamed so they install next to Angry Pig 1.0.0)
+        run: |
+          set -e
+          VST3=$(find build -name "AngryPigSpike.vst3" -type d | head -n 1)
+          AU=$(find build -name "AngryPigSpike.component" -type d | head -n 1)
+          test -n "$VST3" && test -n "$AU"
+          mkdir -p rel
+          cp -R "$VST3" rel/AngryPigDynamicSaturation.vst3
+          cp -R "$AU" rel/AngryPigDynamicSaturation.component
+          for b in rel/AngryPigDynamicSaturation.vst3 rel/AngryPigDynamicSaturation.component; do
+            lipo -archs "$b/Contents/MacOS/AngryPigSpike" | tee -a out/archs.txt
+            lipo -archs "$b/Contents/MacOS/AngryPigSpike" | grep -q arm64
+            lipo -archs "$b/Contents/MacOS/AngryPigSpike" | grep -q x86_64
+            cp notices/THIRD_PARTY_NOTICES.txt "$b/Contents/Resources/THIRD_PARTY_NOTICES.txt"
+            /usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$b/Contents/Info.plist" | tee -a out/bundle-ids.txt
+            codesign --force --deep --sign - "$b"
+            codesign --verify --deep --strict --verbose=2 "$b"
+          done
+          /usr/libexec/PlistBuddy -c "Print :AudioComponents:0:subtype" rel/AngryPigDynamicSaturation.component/Contents/Info.plist | grep -qx APd2
+          # iPlug finds the bundle (AU view, web UI) by BUNDLE_NAME in config.h; it must match these.
+          grep -qx com.AngryPigLab.vst3.AngryPigDynamicSaturation out/bundle-ids.txt
+          grep -qx com.AngryPigLab.audiounit.AngryPigDynamicSaturation out/bundle-ids.txt
+          # No Objective-C class may share a name with Angry Pig 1.0.0 (prefix vAngryPigSpike).
+          for b in rel/AngryPigDynamicSaturation.vst3 rel/AngryPigDynamicSaturation.component; do
+            nm -U "$b/Contents/MacOS/AngryPigSpike" | grep 'OBJC_CLASS_\$_' | sort -u | tee -a out/objc-classes.txt
+            if nm -U "$b/Contents/MacOS/AngryPigSpike" | grep 'OBJC_CLASS_\$_' | grep -q 'vAngryPigSpike\|AngryPigSpike_View'; then exit 1; fi
+            nm -U "$b/Contents/MacOS/AngryPigSpike" | grep 'OBJC_CLASS_\$_' | grep -q 'vAngryPigDynSat'
+          done
+
+      - name: Package PKG and ZIP
+        run: |
+          set -e
+          mkdir -p stage/Library/Audio/Plug-Ins/VST3 stage/Library/Audio/Plug-Ins/Components pkg
+          cp -R rel/AngryPigDynamicSaturation.vst3 stage/Library/Audio/Plug-Ins/VST3/
+          cp -R rel/AngryPigDynamicSaturation.component stage/Library/Audio/Plug-Ins/Components/
+          pkgbuild --root stage --identifier com.angrypiglab.angrypig.dynamicsaturation --version "${VERSION%%-*}" --install-location / "pkg/AngryPig-DynamicSaturation-$VERSION-macOS.pkg"
+          mkdir -p "zip/AngryPig-DynamicSaturation-$VERSION-macOS"
+          cp -R rel/* "zip/AngryPig-DynamicSaturation-$VERSION-macOS/"
+          cp installer/macos-dyn-sat/README-macOS.txt notices/THIRD_PARTY_NOTICES.txt "zip/AngryPig-DynamicSaturation-$VERSION-macOS/"
+          (cd zip && ditto -c -k --sequesterRsrc --keepParent "AngryPig-DynamicSaturation-$VERSION-macOS" "../pkg/AngryPig-DynamicSaturation-$VERSION-macOS.zip")
+          (cd pkg && shasum -a 256 *.pkg *.zip | tee SHA256SUMS-macOS.txt)
+          pkgutil --payload-files "pkg/AngryPig-DynamicSaturation-$VERSION-macOS.pkg" | tee out/pkg-payload.txt
+          if grep -q "AngryPigSpike\.\(vst3\|component\)$" out/pkg-payload.txt; then echo "package would touch Angry Pig 1.0.0"; exit 1; fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos-packages
+          if-no-files-found: error
+          path: |
+            pkg/*
+            out/*
+
+  macos-verify:
+    name: macOS verify (${{ matrix.label }})
+    needs: [ macos-build, windows ]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-14
+            label: arm64
+          - runner: macos-15-intel
+            label: x86_64
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { name: macos-packages, path: dl }
+      - uses: actions/download-artifact@v4
+        with: { name: windows-renders, path: win }
+
+      - name: System
+        run: |
+          mkdir -p logs out
+          { uname -m; sw_vers; sysctl -n machdep.cpu.brand_string 2>/dev/null || true; } | tee logs/system.txt
+          (cd dl/pkg && shasum -a 256 -c SHA256SUMS-macOS.txt) | tee logs/sha256.txt
+
+      - name: Install PKG
+        run: |
+          sudo installer -pkg "dl/pkg/AngryPig-DynamicSaturation-$VERSION-macOS.pkg" -target / | tee logs/install.txt
+          test -d /Library/Audio/Plug-Ins/VST3/AngryPigDynamicSaturation.vst3
+          test -d /Library/Audio/Plug-Ins/Components/AngryPigDynamicSaturation.component
+          test ! -e /Library/Audio/Plug-Ins/VST3/AngryPigSpike.vst3
+
+      - name: auval
+        run: |
+          set +e
+          # A freshly installed component is only found after the registrar rescans.
+          sudo killall -9 AudioComponentRegistrar 2>/dev/null
+          auval -a > logs/auval-list.txt 2>&1
+          grep "APd2" logs/auval-list.txt
+          nm -gU /Library/Audio/Plug-Ins/Components/AngryPigDynamicSaturation.component/Contents/MacOS/AngryPigSpike | grep -E "_Factory|_Entry"
+          auval -v aufx APd2 APLb > logs/auval.txt 2>&1
+          echo "exit $?" >> logs/auval.txt
+          set -e
+          cat logs/auval.txt
+          if ! grep -q "AU VALIDATION SUCCEEDED" logs/auval.txt; then
+            for f in $(ls -t ~/Library/Logs/DiagnosticReports/auval* /Library/Logs/DiagnosticReports/auval* 2>/dev/null | head -n 2); do
+              cp "$f" logs/; head -c 12000 "$f"
+            done
+            exit 1
+          fi
+
+      - name: pluginval (pinned) VST3 and AU
+        run: |
+          set -e
+          curl -sSL -o pv.zip "https://github.com/Tracktion/pluginval/releases/download/$PLUGINVAL_VERSION/pluginval_macOS.zip"
+          echo "$PLUGINVAL_MAC_SHA256  pv.zip" | shasum -a 256 -c -
+          unzip -q pv.zip -d pv
+          BIN=$(find pv -name pluginval -type f | head -n 1); chmod +x "$BIN"
+          "$BIN" --strictness-level 8 --validate /Library/Audio/Plug-Ins/VST3/AngryPigDynamicSaturation.vst3 2>&1 | tee logs/pluginval-vst3.txt
+          "$BIN" --strictness-level 8 --validate-in-process --validate /Library/Audio/Plug-Ins/Components/AngryPigDynamicSaturation.component 2>&1 | tee logs/pluginval-au.txt
+
+      - name: Render on this Mac and compare with the Windows render
+        run: |
+          set -e
+          mkdir -p src/deps && tar -xzf deps/iplug2.tar.gz -C src/deps
+          SDK=src/deps/iplug2/Dependencies/IPlug/VST3_SDK
+          clang++ -std=c++17 -O2 -mmacosx-version-min=11.0 -Wno-deprecated-declarations -I "$SDK" tools/parity/parity_render.cpp \
+            "$SDK/pluginterfaces/base/funknown.cpp" "$SDK/pluginterfaces/base/coreiids.cpp" "$SDK/pluginterfaces/base/ustring.cpp" \
+            "$SDK/pluginterfaces/base/conststringtable.cpp" "$SDK/public.sdk/source/vst/vstinitiids.cpp" \
+            -framework CoreFoundation -framework AudioToolbox -framework AudioUnit -framework CoreAudio -o out/parity_render
+          python3 -m venv venv && venv/bin/pip install --quiet numpy
+          V=/Library/Audio/Plug-Ins/VST3/AngryPigDynamicSaturation.vst3
+          rc=0
+          for fmt in vst3 au; do
+            out/parity_render $fmt $V win/sine44.wav out/${fmt}_sine44.wav 100 0 0 0 none
+            out/parity_render $fmt $V win/input.wav out/${fmt}_fixed.wav 60 40 -6 0 none
+            echo "== $fmt sine vs Windows" | tee -a logs/parity.txt
+            venv/bin/python tools/parity/halo_metrics.py out/${fmt}_sine44.wav --ref win/win_sine44.wav | tee -a logs/parity.txt || rc=1
+            venv/bin/python tools/parity/compare_wav.py out/${fmt}_fixed.wav win/win_fixed.wav 1e-4 | tee -a logs/parity.txt || rc=1
+          done
+          exit $rc
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: macos-verify-${{ matrix.label }}
+          path: |
+            logs
+            out/*.wav

@@ -31,7 +31,12 @@ def main():
         rel = os.path.relpath(path, ROOT)
         if path.endswith('check_repo.py'):
             continue
-        if path.endswith(TEXT_EXT):
+        # src/deps is the unpacked vendored archive (not tracked). experimental/ is the research
+        # archive of the Dynamic Saturation study; it keeps its original paths and wording.
+        skip_text = rel.replace(os.sep, '/').startswith(('src/deps/', 'experimental/'))
+        if rel.replace(os.sep, '/').startswith('src/deps/'):
+            continue
+        if path.endswith(TEXT_EXT) and not skip_text:
             with open(path, encoding='utf-8', errors='replace') as f:
                 text = f.read()
             for pattern, label in FORBIDDEN:

@@ -39,3 +39,6 @@ desktop.ini
 # Dependencies and local tools
 node_modules/
 .env
+
+# Unpacked build dependencies (deps/iplug2.tar.gz, WebView2 NuGet)
+src/deps/
