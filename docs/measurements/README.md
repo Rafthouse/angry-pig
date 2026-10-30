@@ -7,7 +7,7 @@ These tables and plots describe the Windows VST3 build of Angry Pig 1.1.1. They 
 | Item | Value |
 | --- | --- |
 | Plugin | Angry Pig 1.1.1, Windows x64 VST3 |
-| DLL | `Contents\x86_64-win\AngryPigSpike.vst3`, SHA-256 `73BD774610016D9EFD33D0E221F25DB3527E36842599D90F8C21E4C55B1F8CA4` |
+| DLL | `Contents\x86_64-win\AngryPigSpike.vst3`, SHA-256 `72AE70730FB8CFF776C47A7D59089B12C306B2DFEC849F69632A4EC2BBF038F5` |
 | Reported latency | 0 samples |
 | Channels | Stereo in, stereo out |
 

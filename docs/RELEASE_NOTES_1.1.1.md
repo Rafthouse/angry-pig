@@ -81,6 +81,6 @@ The source of the plugin and its build scripts are in this repository: [BUILDING
 
 ## Build provenance
 
-- Source commit: `67c9480379b222f128015e19c08f8669fa9872a4`
-- CI build and test run: [40924734612](https://github.com/Rafthouse/angry-pig/actions/runs/40924734612). The files of this release are the artifacts of that run.
-- Windows DLL SHA-256: `73BD774610016D9EFD33D0E221F25DB3527E36842599D90F8C21E4C55B1F8CA4`
+- Source commit: `dc509fc1851dedce5235f2830fb2bfbef7a49997`
+- CI build and test run: [40988178744](https://github.com/Rafthouse/angry-pig/actions/runs/40988178744). The files of this release are the artifacts of that run.
+- Windows DLL SHA-256: `72AE70730FB8CFF776C47A7D59089B12C306B2DFEC849F69632A4EC2BBF038F5`

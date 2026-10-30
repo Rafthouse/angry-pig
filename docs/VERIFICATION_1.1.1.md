@@ -1,6 +1,6 @@
 # Angry Pig 1.1.1: verification record
 
-What was checked before the `v1.1.1` release, how, and what was not checked. Windows and macOS are evaluated separately. All CI results are from build run [40924734612](https://github.com/Rafthouse/angry-pig/actions/runs/40924734612) (commit `67c9480`); its logs are attached to the run.
+What was checked before the `v1.1.1` release, how, and what was not checked. Windows and macOS are evaluated separately. All CI results are from build run [40988178744](https://github.com/Rafthouse/angry-pig/actions/runs/40988178744) (commit `dc509fc`); its logs are attached to the run.
 
 ## What 1.1.1 is
 
@@ -9,7 +9,7 @@ What was checked before the `v1.1.1` release, how, and what was not checked. Win
 | Audio code | `src/native/APDspEngine.h`, `APDynamicSaturation.h`, `APMatchTables.h`: unchanged from the approved Dynamic Saturation build (`f1d58dcb…`, beta `v1.1.1-dyn-sat-beta1`) |
 | Identity | Name "Angry Pig", version 1.1.1. VST3 class ID `F2AEE70D00DE4F4E41504C6241506D31` (`APLb`/`APm1`), bundle `AngryPigSpike.vst3`, macOS bundle IDs `com.AngryPigLab.vst3.AngryPigSpike` and `com.AngryPigLab.audiounit.AngryPigSpike`, AU `aufx APm1 APLb`. The same class ID, bundle name and VST3 bundle ID as Angry Pig 1.0.0. |
 | Parameters | ANGER 0 to 100 %, COLOR 0 to 100 %, GAIN -36 to +36 dB, BYPASS. Same IDs, order and state format (four values in real units) as 1.0.0. |
-| Windows DLL | SHA-256 `73BD774610016D9EFD33D0E221F25DB3527E36842599D90F8C21E4C55B1F8CA4` |
+| Windows DLL | SHA-256 `72AE70730FB8CFF776C47A7D59089B12C306B2DFEC849F69632A4EC2BBF038F5` |
 
 ## Sound
 
