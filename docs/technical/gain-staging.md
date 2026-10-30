@@ -8,7 +8,7 @@
 | ANGER 0 %, GAIN changed | Output = input + GAIN + 1.0 dB, within 0.01 dB |
 | ANGER 25 %, GAIN 0 dB | Output = input + 10.7 dB at low levels |
 | ANGER 100 %, GAIN 0 dB | Output = input + 40.0 dB at low levels |
-| ANGER 100 %, GAIN raised from 0 to +18 dB | Output rises by only about +1.8 dB, because the saturation stage limits it |
+| ANGER 100 %, GAIN raised from 0 to +36 dB | Output rises by only about +1.9 dB, because the saturation stage limits it |
 
 The gain set by ANGER applies to small signals. Louder signals reach the saturation stage, where the output flattens. Above that point, changes to GAIN and ANGER are much less audible.
 

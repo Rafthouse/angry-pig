@@ -29,20 +29,20 @@ The output fundamental can exceed 0 dBFS. A waveform that is squared off has a f
 
 Measured at 999 Hz, GAIN 0 dB, COLOR 0 %:
 
-| ANGER | Input (dBFS) | H2 (dBc) | H3 (dBc) | H5 (dBc) | THD H2 to H10 (dB) |
+| ANGER | Input (dBFS) | H2 (dBc) | H3 (dBc) | H5 (dBc) | THD H2 to H15 (dB) |
 | --- | --- | --- | --- | --- | --- |
-| 50 % | -12 | below -150 | -15.37 | -50.92 | -15.25 |
-| 50 % | -6 | below -150 | -14.43 | -38.68 | -14.30 |
-| 100 % | -24 | below -150 | -12.09 | -22.91 | -11.70 |
-| 100 % | -12 | below -150 | -11.42 | -20.23 | -10.82 |
-| 100 % | -6 | below -150 | -11.16 | -19.27 | -10.45 |
+| 50 % | -12 | -92.33 | -15.37 | -50.92 | -15.25 |
+| 50 % | -6 | -92.58 | -14.43 | -38.68 | -14.30 |
+| 100 % | -24 | -93.98 | -12.09 | -22.91 | -11.70 |
+| 100 % | -12 | -94.77 | -11.42 | -20.23 | -10.82 |
+| 100 % | -6 | -95.19 | -11.16 | -19.27 | -10.45 |
 
 What this shows:
 
-- The saturation is nearly symmetric. Even harmonics were below the measurement floor at 999 Hz for every condition with COLOR 0 %.
+- The saturation is nearly symmetric. The second harmonic is about -92 to -95 dBc when the stage saturates. It comes from the slow bias of the [dynamic saturation](dynamic-saturation.md). In 1.0.0 even harmonics were below -150 dBc; the odd harmonics and THD are identical in both versions.
 - Odd harmonics dominate. The third harmonic is the strongest.
 - Total harmonic distortion depends on ANGER and level. At full drive it is about -10 to -12 dB relative to the fundamental.
 
 ## Aliasing
 
-The saturation runs at the session sample rate without oversampling (implementation). Harmonics that fall above half the sample rate fold back into the audible range. The effect grows with drive and with high-frequency content. Aliasing was not measured for version 1.0.0.
+The saturation runs at the session sample rate without oversampling (implementation). Harmonics that fall above half the sample rate fold back into the audible range. The effect grows with drive and with high-frequency content. Aliasing was not measured for version 1.1.1.

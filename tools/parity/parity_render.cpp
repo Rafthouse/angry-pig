@@ -4,7 +4,7 @@
 //
 // usage: parity_render <vst3|au> <plugin> <in.wav> <out.wav> <anger 0..100> <color 0..100>
 //                      <gain -36..36> <bypass 0|1> <none|anger-ramp>
-// <plugin>: path to the .vst3 bundle (VST3) or "-" (AU, found by type aufx / APd2 / APLb).
+// <plugin>: path to the .vst3 bundle (VST3) or "-" (AU, found by type aufx / APm1 / APLb).
 // AP_PARITY_BLOCK sets the block size (default 512).|au> <in.wav> <out.wav> <anger 0..100> <color 0..100>
 //                      <gain -24..18> <bypass 0|1> <none|anger-ramp>
 #if defined(__APPLE__)
@@ -361,7 +361,7 @@ static OSStatus auInputProc(void* refCon, AudioUnitRenderActionFlags*, const Aud
 static int renderAu(const Wav& in, Wav& out, const Settings& s) {
     AudioComponentDescription desc{};
     desc.componentType = kAudioUnitType_Effect;
-    desc.componentSubType = 'APd2';
+    desc.componentSubType = 'APm1';
     desc.componentManufacturer = 'APLb';
     AudioComponent comp = AudioComponentFindNext(nullptr, &desc);
     if (!comp) { std::fprintf(stderr, "AU: component not found\n"); return 2; }

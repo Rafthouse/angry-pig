@@ -6,17 +6,17 @@
 	<array>
 		<dict>
 			<key>description</key>
-			<string>Angry Pig Dynamic Saturation</string>
+			<string>Angry Pig</string>
 			<key>factoryFunction</key>
 			<string>AngryPigSpike_Factory</string>
 			<key>manufacturer</key>
 			<string>APLb</string>
 			<key>name</key>
-			<string>AngryPigLab: Angry Pig Dynamic Saturation</string>
+			<string>AngryPigLab: Angry Pig</string>
 			<key>sandboxSafe</key>
 			<true/>
 			<key>subtype</key>
-			<string>APd2</string>
+			<string>APm1</string>
 			<key>type</key>
 			<string>aufx</string>
 			<key>version</key>
@@ -30,9 +30,9 @@
 	<key>CFBundleExecutable</key>
 	<string>AngryPigSpike</string>
 	<key>CFBundleGetInfoString</key>
-	<string>Angry Pig Dynamic Saturation 1.1.1 beta 1 Copyright 2026 Mykyta Shchur</string>
+	<string>Angry Pig 1.1.1 Copyright 2026 Mykyta Shchur</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.AngryPigLab.audiounit.AngryPigDynamicSaturation</string>
+	<string>com.AngryPigLab.audiounit.AngryPigSpike</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -42,7 +42,7 @@
 	<key>CFBundleShortVersionString</key>
 	<string>1.1.1</string>
 	<key>CFBundleSignature</key>
-	<string>APd2</string>
+	<string>APm1</string>
 	<key>CFBundleVersion</key>
 	<string>1.1.1</string>
 	<key>CSResourcesFileMapped</key>

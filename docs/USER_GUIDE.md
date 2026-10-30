@@ -2,17 +2,18 @@
 
 Angry Pig is a saturation and distortion plugin. You put it on a track, drive the sound into a saturation stage, and shape the result with four controls. This guide explains what each control does, how to set levels, and how to get subtle or strong results.
 
-Version: 1.0.0 (Windows and macOS, VST3; no Audio Unit).
+Version: 1.1.1 (Windows: VST3. macOS: VST3 and Audio Unit).
 
 ---
 
 ## 1. What Angry Pig does
 
-Angry Pig does three things to a stereo signal:
+Angry Pig does four things to a stereo signal:
 
 1. **Filters the low end.** A high-pass filter removes the lowest frequencies before the drive stage. The corner is near 30 Hz.
 2. **Drives the signal.** The level going into the saturation stage is raised by ANGER and GAIN. The saturation stage turns peaks into a soft, rounded curve, which adds harmonics.
 3. **Controls peaks.** A level detector applies gain reduction when the driven signal is loud. Above that, the saturation curve limits the output so that its peaks approach about -0.1 dBFS.
+4. **Moves with the signal.** A small, level-dependent movement in the saturation stage adds a soft halo around the harmonics, about 75 dB below the signal. It follows the input: silence stays silent. It has no control. See [Dynamic saturation](technical/dynamic-saturation.md).
 
 The result is more density, edge and character. At low settings the change is small. At high settings the sound becomes clearly distorted.
 
@@ -24,8 +25,9 @@ See [INSTALLATION.md](INSTALLATION.md) for the installer and the manual method. 
 
 Angry Pig is an audio effect. Put it on an **audio track** after the sound source.
 
-- **Ableton Live:** open the browser, choose *Plug-Ins*, find **Angry Pig 1.0**, and drag it onto the track.
-- **Other DAWs:** insert Angry Pig 1.0 in the track's effects or FX slots.
+- **Ableton Live:** open the browser, choose *Plug-Ins*, find **Angry Pig**, and drag it onto the track.
+- **Logic Pro (macOS):** insert **Angry Pig** from *Audio Units → AngryPigLab*.
+- **Other DAWs:** insert Angry Pig in the track's effects or FX slots.
 
 Use a **stereo** track. Angry Pig processes two channels. It does not accept mono input.
 
@@ -62,7 +64,7 @@ COLOR shapes the tone before the drive stage.
 
 Because COLOR boosts a band before the drive, a boosted band can enter saturation sooner than the rest of the signal. This can add distortion that would not appear at COLOR 0 %.
 
-### GAIN (-24 to +18 dB)
+### GAIN (-36 to +36 dB)
 
 GAIN sets the level going into the saturation stage. It works together with ANGER.
 
@@ -118,14 +120,16 @@ These are starting points, not presets. Adjust them to your material.
 ## 9. Saving sessions and settings
 
 - Angry Pig's settings are saved with your DAW project. Reopening the project restores the controls.
-- Angry Pig 1.0 does not include factory presets. Save your own settings using your DAW's preset or project features.
+- Angry Pig does not include factory presets. Save your own settings using your DAW's preset or project features.
 - Automation: the four parameters can be automated from your DAW. Automation and project recall have not been fully tested across DAWs yet, so check your results after reopening a project.
+- **Projects made with Angry Pig 1.0.0** open with 1.1.1. ANGER, COLOR, GAIN and BYPASS load with the same values. GAIN **automation** recorded with 1.0.0 plays back at different values, because the GAIN range changed from -24 to +18 dB to -36 to +36 dB: for example 0 dB becomes +5.1 dB. Check and redraw GAIN automation in those projects. See the [release notes](RELEASE_NOTES_1.1.1.md#projects-from-angry-pig-100).
 
 ## 10. Troubleshooting
 
 | Problem | What to try |
 | --- | --- |
-| Angry Pig does not appear in the DAW | Rescan plugins. Confirm that the VST3 bundle is in `C:\Program Files\Common Files\VST3\`. |
+| Angry Pig does not appear in the DAW | Rescan plugins. Confirm that the VST3 bundle is in `C:\Program Files\Common Files\VST3\` (macOS: `/Library/Audio/Plug-Ins/VST3/` or `/Library/Audio/Plug-Ins/Components/`). |
+| An old project sounds louder or quieter than before | GAIN automation recorded with 1.0.0 plays back at different values in 1.1.1. Redraw it. |
 | The window is blank or does not open | Install the Microsoft Edge WebView2 Runtime, then open the plugin again. |
 | The installer says a host is holding the file | Close all DAWs and plugin hosts, then run the installer again. |
 | No sound after Angry Pig | Check that BYPASS is off, the track is stereo, and the track's input and output are set correctly. |
@@ -135,11 +139,11 @@ These are starting points, not presets. Adjust them to your material.
 
 ## 11. Known limitations
 
-- Windows and macOS (11.0 or later) VST3 only. There is no Audio Unit in 1.0.0. The macOS packages are not notarized; see [INSTALLATION.md](INSTALLATION.md#macos).
+- Windows: VST3. macOS (11.0 or later): VST3 and Audio Unit. The macOS packages are not notarized and have not been tested on a physical Mac yet; see [INSTALLATION.md](INSTALLATION.md#macos).
 - Stereo only. Mono input is not supported.
 - Saturation runs at the session sample rate without oversampling. At high drive, high-frequency harmonics can fold back (alias).
 - The installer and the plugin are not code-signed yet. Windows may show a warning.
 - Automation and project recall have not been verified across all DAWs.
-- Plugin hosts other than Ableton Live 12 Suite have not been tested.
+- Host testing: Ableton Live 12 Suite (1.0.0) and REAPER (the 1.1.1 sound) on Windows. Other hosts have not been tested.
 
 Report problems through the [issue tracker](https://github.com/Rafthouse/angry-pig/issues).

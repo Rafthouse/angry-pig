@@ -1,5 +1,7 @@
 # Dynamic Saturation 1.1.1 beta 1: verification record
 
+> **Superseded by [Angry Pig 1.1.1](../RELEASE_NOTES_1.1.1.md).** 1.1.1 has the same audio output, replaces Angry Pig 1.0.0 and uses the 1.0.0 plugin ID. This page is kept as the record of the beta.
+
 What was checked before the `v1.1.1-dyn-sat-beta1` pre-release, and how. Windows and macOS are evaluated separately.
 
 ## Baseline

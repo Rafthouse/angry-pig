@@ -1,12 +1,12 @@
 #requires -Version 5.1
 <#
 .SYNOPSIS
-  Angry Pig Dynamic Saturation 1.1.1 Beta 1 installer core (unsigned build).
+  Angry Pig 1.1.1 installer core (unsigned build).
 
 .DESCRIPTION
   Actions: Status (default), Install, Uninstall, Rollback.
-  Touches only <VST3Root>\AngryPigDynamicSaturation.vst3 and <DataRoot>\. Never edits other plugins.
-  Existing bundles that are not this build (for example Windows Build 01) are never overwritten
+  Touches only <VST3Root>\AngryPigSpike.vst3 and <DataRoot>\. Never edits other plugins.
+  Existing bundles that are not this build (for example Angry Pig 1.0.0) are never overwritten
   silently: Install and Uninstall refuse with exit code 3 unless -ReplaceExisting is passed,
   and in that case the old bundle is copied to <DataRoot>\backup\<stamp>\ first.
 
@@ -34,7 +34,7 @@ param(
     [string]$Action = 'Status',
     [string]$VST3Root = (Join-Path $env:CommonProgramFiles 'VST3'),
     [string]$PayloadRoot = (Join-Path $PSScriptRoot 'payload'),
-    [string]$DataRoot = (Join-Path $env:ProgramData 'AngryPigDynamicSaturation-Beta1'),
+    [string]$DataRoot = (Join-Path $env:ProgramData 'AngryPig'),
     [string]$BackupPath = '',
     [switch]$AcceptLicense,
     [switch]$ReplaceExisting
@@ -42,8 +42,8 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-$BundleName = 'AngryPigDynamicSaturation.vst3'
-$DllRel = 'Contents\x86_64-win\AngryPigDynamicSaturation.vst3'
+$BundleName = 'AngryPigSpike.vst3'
+$DllRel = 'Contents\x86_64-win\AngryPigSpike.vst3'
 $WebView2Client = '{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}'
 $LogFile = Join-Path $DataRoot 'install.log'
 $Stamp = Get-Date -Format 'yyyyMMdd-HHmmss-fff'
@@ -214,7 +214,7 @@ try {
         }
         if ($st.Kind -ne 'missing' -and -not $ReplaceExisting) {
             Write-Log "result=conflict existing_sha=$($st.Sha) build01=$($st.Build01)"
-            Write-Host 'A different AngryPigDynamicSaturation.vst3 is already installed. Re-run with -ReplaceExisting to back it up and replace it.'
+            Write-Host 'A different AngryPigSpike.vst3 (for example Angry Pig 1.0.0) is already installed. Re-run with -ReplaceExisting to back it up and replace it.'
             exit 3
         }
         $backupDir = $null

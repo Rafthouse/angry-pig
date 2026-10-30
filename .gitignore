@@ -42,3 +42,4 @@ node_modules/
 
 # Unpacked build dependencies (deps/iplug2.tar.gz, WebView2 NuGet)
 src/deps/
+__pycache__/

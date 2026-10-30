@@ -38,11 +38,11 @@ At ANGER 100 %, the peak is about 47.5 dB at 8 kHz: the 40 dB small-signal gain 
 
 Because COLOR boosts a band before the drive stage, that band reaches saturation sooner. Measured at ANGER 50 %, input -24 dBFS: total harmonic distortion is -174.5 dB at COLOR 0 % and -40.1 dB at COLOR 50 %. See the [measurements](../measurements/README.md#effect-of-color-on-distortion).
 
-## GAIN (-24 to +18 dB, default 0 dB)
+## GAIN (-36 to +36 dB, default 0 dB)
 
-**Implementation.** GAIN is added in dB to the drive gain, before the level detector and the saturation stage.
+**Implementation.** GAIN is added in dB to the drive gain, before the level detector and the saturation stage. The range is -36 to +36 dB since 1.1.1 (1.0.0: -24 to +18 dB). A saved GAIN value keeps its dB value; host automation recorded with 1.0.0 does not (see the [release notes](../RELEASE_NOTES_1.1.1.md#projects-from-angry-pig-100)).
 
-**Measured.** At ANGER 0 %, the output equals the input plus GAIN plus 1.0 dB, within 0.01 dB across the range. At ANGER 100 %, the saturation stage limits the output: raising GAIN from 0 to +18 dB changes the output by about +1.8 dB. See [Gain staging](gain-staging.md).
+**Measured.** At ANGER 0 %, the output equals the input plus GAIN plus 1.0 dB, within 0.01 dB across the range. At ANGER 100 %, the saturation stage limits the output: raising GAIN from 0 to +36 dB changes the output by about +1.9 dB. See [Gain staging](gain-staging.md).
 
 ## BYPASS (off by default)
 
